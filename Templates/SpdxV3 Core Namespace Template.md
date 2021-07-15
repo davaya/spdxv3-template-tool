@@ -144,7 +144,7 @@ An External Map is a map of Element identifiers that are used within a Document 
 | verifiedUsing | IntegrityMethod | 0 | * | |
 | elementURL | URL | 0 | * | |
 | createdBy | Identity | 0 | 1 | |
-| definingDocument | IdString | 0 | 1 | (Document) |
+| definingDocument | Document | 0 | 1 | IDString |
 
 #### 1.4.5 Examples
 
@@ -271,7 +271,7 @@ An artifact is a distinct article or unit within the digital domain such as an e
 | Property | Datatype | Min Count | Max Count | Format |
 |:--|:--|:--| :--| :--|
 | artifactURL | ArtifactURL | 0 | 1 | |
-| originatedBY | Identity | 0 | 1 | |
+| originatedBy | Identity | 0 | 1 | |
 
 #### 1.8.5 Examples
 
@@ -560,37 +560,6 @@ A Tool is an element of hardware and/or software utilized to carry out a particu
 
 
 .>
-
-
-### 1.18 DateTime 
-
-#### 1.18.1 Summary
-
-Date and Time.
-
-#### 1.18.2 Metadata
-
-| Attribute | Value |
-| :-------- | :---- |
-| id | IRI |
-| name | DateTime |
-| SubclassOf | none |
-| Instantiability | Concrete |
-| Status | stable |
-
-#### 1.18.3 Description
-
-Number of seconds since the start of 1 January 1970, text representation defined by RFC 3339.
-
-#### 1.18.4 Shape
-
-| Property | Datatype | Min Count | Max Count | Format |
-|:--|:--|:--| :--| :--|
-| name | xsd:integer | 1 | 1 | /dateTime |
-
-#### 1.18.5 Examples
-
-<This section provides any relevant serialized examples of this class.>
 
 
 
@@ -1598,7 +1567,7 @@ Number of seconds since the start of 1 January 1970, text representation defined
 | COPY_OF | |
 | FILE_ADDED | |
 | FILE_DELETED | |
-|FILE_MODIFIED | |
+| FILE_MODIFIED | |
 | EXPANDED_FROM_ARCHIVE | |
 | DYNAMIC_LINK | |
 | STATIC_LINK | |

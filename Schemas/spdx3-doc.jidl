@@ -4,9 +4,13 @@ title: "SPDX v3"
 description: "Information Model: Document serialization derived from SPDX v3 ontology"
 license: "CC0-1.0"
 
-SpdxDocument = Array
+Document = Record
    1 root          IdString
-   2 elements      MapOf(IdString, ElementType){1..*}
+   2 namespace     URI
+   3 specVersion   SemVer     // (in all elements?)
+   4 profiles      ProfileIdentifier [1..*]  // (in all elements?)
+   5 dataLicense   LicenseId  // (in all elements?) optional?
+   3 elements      ElementType [1..*]
 
 ElementType = Choice
    1 document      Document
@@ -14,13 +18,6 @@ ElementType = Choice
    3 identity      Identity
    4 relationship  Relationship
    5 annotation    Annotation
-
-Document = Record
-   1 element Element
-   2 namespace URI
-   3 specVersion SemVer
-   4 profiles ProfileIdentifier [1..*]
-   5 dataLicense LicenseId  // optional?
 
 Artifact = Record
    1 element Element

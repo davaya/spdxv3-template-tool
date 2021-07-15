@@ -59,8 +59,8 @@ def load_template(doc: str) -> dict:
                     print(f'{ln:>6}: Structure Error: {line}')
                 if m and len(m.group(1)) == 0:
                     print(f'{ln:>6}: Warning: no space after heading level: {line}')
-            elif l4 in {'Metadata', 'Shape'}:
-                tl = [v.strip() for v in line.strip('|').split('|')]
+            elif l4 in {'Metadata', 'Shape', 'Vocabulary Entries'} and line.strip().startswith('|'):
+                tl = [v.strip() for v in line.strip().strip('|').split('|')]
                 if table_state == 0:
                     th = tl
                     table_state = 1
@@ -131,21 +131,31 @@ if __name__ == '__main__':
               'types': []}
 
     # Convert "Shape" sections to Record type definitions
+    props = []
     for mt in template['Classes'].values():
         cx = {v: n for n, v in enumerate(mt['Shape']['head'])}
         fields = []
         for fn, fv in enumerate(mt['Shape']['body'], start=1):
             opts = multopts(fv[cx['Min Count']], fv[cx['Max Count']])
             fields.append([fn, fv[cx['Property']], fieldtype(fv[cx['Datatype']]), opts, fv[cx['Format']]])
+            props.append([fv[cx['Property']], fv[cx['Datatype']], fv[cx['Format']]])
         schema['types'].append([mt['meta']['name'], 'Record', [], '', fields])
 
-    # Convert "Properties" sections to ...
-    for mt in template['Properties'].values():
-        pass
+    # Validate "Properties" for consistency with Shapes
+    for p in props:
+        try:
+            if template['Properties'][p[0]]['meta']['Range'] != p[1]:
+                print(f'{str(p):40} != {template["Properties"][p[0]]["meta"]}')
+        except KeyError:
+            print(f'No Property {p[0]}')
 
     # Convert "Vocabularies" sections to Enumerated type definitions
     for mt in template['Vocabularies'].values():
-        pass
+        cx = {v: n for n, v in enumerate(mt['Vocabulary Entries']['head'])}
+        items = []
+        for fn, fv in enumerate(mt['Vocabulary Entries']['body'], start=1):
+            items.append([fn, fv[cx['Entry Value']], fv[cx['Entry Description']]])
+        schema['types'].append([mt['meta']['name'], 'Enumerated', [], '', items])
 
     # Generate information model (.jadn, .jidl) and JSON Schema (.json)
     # TODO: generate XML schema (.xsd), YAML, spreadsheet, Tag:Value, etc.
@@ -156,4 +166,4 @@ if __name__ == '__main__':
     jadn.translate.json_schema_dump(schema, os.path.join(outdir, OUTPUT_FILE + '.json'))
 
     # Check for completeness
-    print('\n'.join([f'{k:>15}: {v}' for k, v in jadn.analyze(jadn.check(schema)).items()]))
+    print('\n', '\n'.join([f'{k:>15}: {v}' for k, v in jadn.analyze(jadn.check(schema)).items()]))
