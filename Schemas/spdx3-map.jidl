@@ -4,7 +4,7 @@ title: "SPDX v3"
 description: "Information Model: Document serialization derived from SPDX v3 ontology"
 license: "CC0-1.0"
 
-SpdxDocument = Array
+SpdxDocument = MapOf(ElementType)
    1 root          IdString
    2 elements      MapOf(IdString, ElementType){1..*}
 

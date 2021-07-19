@@ -11,13 +11,42 @@ in a simplified format is proposed.
 
 DATA_DIR = 'Templates'
 OUTPUT_DIR = 'Out'
+TEMPLATE_ROOT_DIR = '../spec-v3-template/model'
 TEMPLATE_FILE = 'SpdxV3 Core Namespace Template.md'
-OUTPUT_FILE = 'spdxv3-from-template'
+OUTPUT_FILE = 'spdxv3-from-list-template'
 
 
-def load_template(doc: str) -> dict:
+def load_template_from_list_dirs(rootdir: str) -> dict:
     """
-    Load SPDX v3 template in markdown format
+    Load SPDX v3 template from individual files in markdown list format
+    :param rootdir: top level in directory hierarchy
+    """
+
+    templ = {}
+    l1, l2, l3, l4 = '', '', '', ''
+    for l1 in os.listdir(TEMPLATE_ROOT_DIR):
+        for l2 in os.listdir(os.path.join(TEMPLATE_ROOT_DIR, l1)):
+            for l3 in os.listdir(os.path.join(TEMPLATE_ROOT_DIR, l1, l2)):
+                print(l1, l2, l3)
+                with open(os.listdir(os.path.join(TEMPLATE_ROOT_DIR, l1, l2))) as fp:
+                    doc = fp.read()
+                for ln, line in enumerate(doc.splitlines(), start=1):
+                    if len(line):
+                        if m := re.match(r'^##\s+(.+)\s*$'):
+                            section = m.group(1)
+                            li1, li2 = '', ''
+                        elif m := re.match(r'^-\s+(.+)\s*$'):
+                            li1 = m.group(1)
+                            li2 = ''
+                        elif m := re.match(r'^\s+-\s+(.+)\s*$'):
+                            l2 = m.group(1)
+
+    return templ
+
+
+def load_template_from_file(doc: str) -> dict:
+    """
+    Load SPDX v3 template in markdown table format
     :param doc: markdown file
     :return: 3-level template structure: Category / Instance / Values
         "Classes": [
@@ -118,8 +147,11 @@ if __name__ == '__main__':
     print(f'Installed JADN version: {jadn.__version__}\n')
 
     # Load data from single template file, or collect from individual class files on GitHub
-    with open(os.path.join(DATA_DIR, TEMPLATE_FILE), 'r') as fp:
-        template = load_template(fp.read())
+    # with open(os.path.join(DATA_DIR, TEMPLATE_FILE), 'r') as fp:
+        # template = load_template(fp.read())
+
+    # Load data from directory tree of individual files
+    template = load_template_from_list_dirs(TEMPLATE_ROOT_DIR)
 
     # Convert all "Metadata" sections from Attribute-Value list to "meta" dict
     for mc in template.values():
