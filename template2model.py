@@ -17,6 +17,7 @@ OUTPUT_FILE = 'spdxv3-from-list-template'
 MODEL_DIRS = ('Classes', 'Vocabularies', 'Properties')
 
 
+
 def list_dir(dirname: str) -> tuple:
     d, f = [], []
     with os.scandir(os.path.join(TEMPLATE_ROOT_DIR, dirname)) as it:
