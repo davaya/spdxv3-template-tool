@@ -2,8 +2,6 @@ import jadn
 import os
 import re
 
-from typing import Tuple
-
 """
 Generate serializations from an SPDX v3 template using a JADN information model
 
