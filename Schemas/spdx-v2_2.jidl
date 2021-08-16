@@ -168,13 +168,6 @@ ExternalRef = Record
   3 referenceLocator ReferenceLocator
   4 comment String optional
 
-ReferenceCategory = Enumerated  // 3.2.1.4 (no underscores)
-  1 SECURITY
-  2 PACKAGE-MANAGER
-  3 PERSISTENT-ID
-  4 PACKAGE_MANAGER     // typo - delete
- 99 OTHER
-
 ReferenceType = String  // appendix VI gives regexs for category types
 
 ReferenceLocator = String
@@ -250,6 +243,13 @@ HashAlgorithm = Enumerated
   7 MD4
   8 MD5
   9 MD6
+
+ReferenceCategory = Enumerated  // 3.2.1.4 (no underscores)
+  1 SECURITY
+  2 PACKAGE-MANAGER
+  3 PERSISTENT-ID
+  4 PACKAGE_MANAGER     // typo - delete
+ 99 OTHER
 
 RelationshipType = Enumerated
   0 NONE

@@ -2,6 +2,8 @@ import jadn
 import os
 import re
 
+from typing import Tuple
+
 """
 Generate serializations from an SPDX v3 template using a JADN information model
 
@@ -11,9 +13,19 @@ in a simplified format is proposed.
 
 DATA_DIR = 'Templates'
 OUTPUT_DIR = 'Out'
-TEMPLATE_ROOT_DIR = '../spec-v3-template/model'
+TEMPLATE_ROOT_DIR = os.path.join('..', 'spec-v3-template', 'model')
 TEMPLATE_FILE = 'SpdxV3 Core Namespace Template.md'
 OUTPUT_FILE = 'spdxv3-from-list-template'
+MODEL_DIRS = ('Classes', 'Vocabularies', 'Properties')
+
+
+def list_dir(dirname: str) -> tuple:
+    d, f = [], []
+    with os.scandir(os.path.join(TEMPLATE_ROOT_DIR, dirname)) as it:
+        for entry in it:
+            x = d if entry.is_dir() else f
+            x.append(entry.name)
+    return tuple(d, f)
 
 
 def load_template_from_list_dirs(rootdir: str) -> dict:
@@ -23,22 +35,25 @@ def load_template_from_list_dirs(rootdir: str) -> dict:
     """
 
     templ = {}
-    l1, l2, l3, l4 = '', '', '', ''
-    for l1 in os.listdir(TEMPLATE_ROOT_DIR):
-        for l2 in os.listdir(os.path.join(TEMPLATE_ROOT_DIR, l1)):
-            for l3 in os.listdir(os.path.join(TEMPLATE_ROOT_DIR, l1, l2)):
-                print(l1, l2, l3)
-                with open(os.listdir(os.path.join(TEMPLATE_ROOT_DIR, l1, l2))) as fp:
+    for d1 in list_dir(''):
+        for f2 in os.listdir(os.path.join(TEMPLATE_ROOT_DIR, f1)):
+            if f2 not in MODEL_DIRS:
+                raise ValueError(f'Unexpected Directory {f1}/{f2}, not in {MODEL_DIRS}')
+            for f3 in os.listdir(os.path.join(TEMPLATE_ROOT_DIR, f1, f2)):
+                if os.path.isdir(fpath := os.path.join(TEMPLATE_ROOT_DIR, f1, f2, f3)):
+                    raise ValueError(f'Unexpected Directory {f3} at leaf {f1}/{f2}')
+                print(fpath)
+                with open(fpath) as fp:
                     doc = fp.read()
                 for ln, line in enumerate(doc.splitlines(), start=1):
                     if len(line):
-                        if m := re.match(r'^##\s+(.+)\s*$'):
+                        if m := re.match(r'^##\s+(.+)\s*$', line):
                             section = m.group(1)
                             li1, li2 = '', ''
-                        elif m := re.match(r'^-\s+(.+)\s*$'):
+                        elif m := re.match(r'^-\s+(.+)\s*$', line):
                             li1 = m.group(1)
                             li2 = ''
-                        elif m := re.match(r'^\s+-\s+(.+)\s*$'):
+                        elif m := re.match(r'^\s+-\s+(.+)\s*$', line):
                             l2 = m.group(1)
 
     return templ

@@ -27,6 +27,7 @@ def translate(filename: str, sdir: str, odir: str) -> NoReturn:
     print('\n'.join([f'{k:>15}: {v}' for k, v in jadn.analyze(jadn.check(schema)).items()]))
 
     jadn.convert.dot_dump(schema, os.path.join(odir, fn + '.dot'), style={'links': True})
+    jadn.convert.plant_dump(schema, os.path.join(odir, fn + '.puml'), style={'links': True})
     cols = {'desc': 48, 'page': 120}    # specify comment position and page width to truncate
     jadn.convert.jidl_dump(schema, os.path.join(odir, fn + '.jidl'), style=cols)
     jadn.convert.html_dump(schema, os.path.join(odir, fn + '.html'))
