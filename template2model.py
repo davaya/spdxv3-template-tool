@@ -1,31 +1,87 @@
 import jadn
 import os
 import re
-
-from typing import Tuple
+from collections import defaultdict
 
 """
 Generate serializations from an SPDX v3 template using a JADN information model
-
-Template is currently a single markdown file, but a collection of individual GitHub files
-in a simplified format is proposed.
 """
 
 DATA_DIR = 'Templates'
 OUTPUT_DIR = 'Out'
 TEMPLATE_ROOT_DIR = os.path.join('..', 'spec-v3-template', 'model')
+TEMPLATE_ROOT_REPO = 'https://api.github.com/repos/spdx/spec-v3-template/contents/model'
 TEMPLATE_FILE = 'SpdxV3 Core Namespace Template.md'
 OUTPUT_FILE = 'spdxv3-from-list-template'
-MODEL_DIRS = ('Classes', 'Vocabularies', 'Properties')
+MODEL_DIRS = ('Classes', 'Properties', 'Vocabularies')
 
 
-def list_dir(dirname: str) -> tuple:
-    d, f = [], []
-    with os.scandir(os.path.join(TEMPLATE_ROOT_DIR, dirname)) as it:
-        for entry in it:
-            x = d if entry.is_dir() else f
-            x.append(entry.name)
-    return tuple(d, f)
+def list_dir(dirname: str) -> dict:
+    files, dirs = [], []
+    if dirname.startswith('https://'):
+        pass
+    else:
+        with os.scandir(dirname) as dlist:
+            for entry in dlist:
+                (dirs if os.path.isdir(entry) else files).append(entry)
+    return {'files': files, 'dirs': dirs}
+
+
+def read_file(path: str) -> str:
+    with open(path) as fp:
+        doc = fp.read()
+    return doc
+
+
+def load_template_file(file: str, category: str, fname: str) -> dict:
+    tval = defaultdict(dict)
+    tval['Metadata']['name'] = fname
+    section = ''
+    for ln, line in enumerate(file.splitlines(), start=1):
+        if len(line):
+            if m := re.match(r'^#\s+(.+)\s*$', line):
+                if fname != m.group(1):
+                    print(f'{ln:4} {fname} -- File name does not match heading {m.group(1)}')
+            elif m := re.match(r'^##\s+(.+)\s*$', line):
+                section = m.group(1)
+                li1, li2 = '', ''
+                if section not in ('Summary', 'Description', 'Metadata', 'Properties', 'Entries'):
+                    print(f'{ln:4} {fname} -- Unknown section {section}')
+                if section == 'Metadata':
+                    tval[section] = {'name': fname}
+                    cdefault = {'id': '${NAMESPACE_id}/' + fname, 'Instantiability': 'Concrete', 'Status': 'Stable'}
+                    tval[section].update(cdefault if category == 'Classes' else {})
+            elif m := re.match(r'^-\s+(.+)\s*$', line):
+                li1 = m.group(1)
+                if section in ('Metadata', 'Entries'):
+                    k, v = li1.split(':', maxsplit=1)
+                    tval[section].update({k.strip(): v.strip()})
+                elif section == 'Properties':
+                    pdefault = {'minCount': 0, 'maxCount': '*'} if category == 'Classes' else {}
+                    tval[section].update({li1: pdefault})
+            elif m := re.match(r'^\s+-\s+(.+)\s*$', line):
+                li2 = m.group(1)
+                if section == 'Properties':
+                    if ':' in li2:
+                        k, v = li2.split(':', maxsplit=1)
+                        tval[section][li1].update({k.strip(): v.strip()})
+                    else:
+                        print(f'{ln:4} {fname} -- {section}?: {li1}: {li2}')
+            elif section not in ('Description', 'Summary'):
+                print(f'{ln:4} {fname} -- Unrecognized data?: {line}')
+    missing = {'Classes': set(('Metadata', 'Properties')),
+               'Properties': set(('Metadata',)),
+               'Vocabularies': set(('Metadata', 'Entries'))}[category] - set(tval)
+    if missing:
+        print(f'     {fname} -- Missing required section {missing}')
+    return dict(tval)
+
+
+def dd():
+    """
+    Return a recursive defaultdict
+    """
+    return defaultdict(dd)
 
 
 def load_template_from_list_dirs(rootdir: str) -> dict:
@@ -34,29 +90,28 @@ def load_template_from_list_dirs(rootdir: str) -> dict:
     :param rootdir: top level in directory hierarchy
     """
 
-    templ = {}
-    for d1 in list_dir(''):
-        for f2 in os.listdir(os.path.join(TEMPLATE_ROOT_DIR, f1)):
-            if f2 not in MODEL_DIRS:
-                raise ValueError(f'Unexpected Directory {f1}/{f2}, not in {MODEL_DIRS}')
-            for f3 in os.listdir(os.path.join(TEMPLATE_ROOT_DIR, f1, f2)):
-                if os.path.isdir(fpath := os.path.join(TEMPLATE_ROOT_DIR, f1, f2, f3)):
-                    raise ValueError(f'Unexpected Directory {f3} at leaf {f1}/{f2}')
-                print(fpath)
-                with open(fpath) as fp:
-                    doc = fp.read()
-                for ln, line in enumerate(doc.splitlines(), start=1):
-                    if len(line):
-                        if m := re.match(r'^##\s+(.+)\s*$', line):
-                            section = m.group(1)
-                            li1, li2 = '', ''
-                        elif m := re.match(r'^-\s+(.+)\s*$', line):
-                            li1 = m.group(1)
-                            li2 = ''
-                        elif m := re.match(r'^\s+-\s+(.+)\s*$', line):
-                            l2 = m.group(1)
-
-    return templ
+    templ = dd()
+    t1 = list_dir(rootdir)
+    for f1 in t1['files']:
+        print(f'     File {f1.path} ignored')
+    for d1 in t1['dirs']:
+        t2 = list_dir(d1.path)
+        for f2 in t2['files']:
+            print(f'     File {f2.path} ignored')
+        for d2 in t2['dirs']:
+            if d2.name not in MODEL_DIRS:
+                raise ValueError(f'Unexpected Directory {d2.path}, not in {MODEL_DIRS}')
+            t3 = list_dir(d2.path)
+            for d3 in t3['dirs']:
+                raise ValueError(f'Unexpected Directory at leaf {d3.path}')
+            for f3 in t3['files']:
+                if f3.name.startswith('_'):
+                    print(f' Template {f3.path} ignored')
+                else:
+                    doc = read_file(f3.path)
+                    fname = os.path.splitext(f3.name)[0]
+                    templ[d1.name][d2.name][fname] = load_template_file(doc, d2.name, fname)
+    return dict(templ)
 
 
 def load_template_from_file(doc: str) -> dict:
@@ -153,7 +208,8 @@ def fieldtype(typename: str) -> str:
     tmap = {
         'xsd:string': 'String',
         'xsd:integer': 'Integer',
-        'xsd:decimal': 'Number'
+        'xsd:decimal': 'Number',
+        'xsd:dateTime': 'Timestamp'
     }
     return tmap[typename] if typename in tmap else typename
 
@@ -161,34 +217,39 @@ def fieldtype(typename: str) -> str:
 if __name__ == '__main__':
     print(f'Installed JADN version: {jadn.__version__}\n')
 
-    # Load data from single template file, or collect from individual class files on GitHub
-    # with open(os.path.join(DATA_DIR, TEMPLATE_FILE), 'r') as fp:
-        # template = load_template(fp.read())
-
     # Load data from directory tree of individual files
-    template = load_template_from_list_dirs(TEMPLATE_ROOT_DIR)
+    # Local filesystem: TEMPLATE_ROOT_DIR
+    # GitHub repo: TEMPLATE_ROOT_REPO
+
+    tmp = load_template_from_list_dirs(TEMPLATE_ROOT_DIR)
+    template = tmp['Core']
 
     # Convert all "Metadata" sections from Attribute-Value list to "meta" dict
-    for mc in template.values():
-        for mt in mc.values():
-            mt['meta'] = {ma[0]: ma[1] for ma in mt['Metadata']['body']}
+    # for mc in template.values():
+    #     for mt in mc.values():
+    #         mt['meta'] = {ma[0]: ma[1] for ma in mt['Metadata']['body']}
 
     # Make up a Core namespace until the template defines it
     schema = {'info': {'package': 'http://www.example.com/foo'},
               'types': []}
 
-    # Convert "Shape" sections to Record type definitions
+    # Convert Class Properties (shape) sections to Record type definitions
     props = []
     for mt in template['Classes'].values():
-        cx = {v: n for n, v in enumerate(mt['Shape']['head'])}
         fields = []
-        for fn, fv in enumerate(mt['Shape']['body'], start=1):
-            opts = multopts(fv[cx['Min Count']], fv[cx['Max Count']])
-            fields.append([fn, fv[cx['Property']], fieldtype(fv[cx['Datatype']]), opts, fv[cx['Format']]])
-            props.append([fv[cx['Property']], fv[cx['Datatype']], fv[cx['Format']]])
-        schema['types'].append([mt['meta']['name'], 'Record', [], '', fields])
+        sect = mt.get('Properties', {})
+        if not sect:
+            print(f'Missing properties section - {mt["Metadata"]["name"]}')
+        for fn, fv in enumerate(sect.items(), start=1):
+            ftype = fv[1].get('type', '')
+            if not ftype:
+                print(f'Missing type - {mt["Metadata"]["name"]}:{fv[0]}')
+            opts = multopts(fv[1]['minCount'], fv[1]['maxCount'])
+            fields.append([fn, fv[0], fieldtype(ftype), opts, ''])
+            props.append([fv[0], ftype, ''])
+        schema['types'].append([mt['Metadata']['name'], 'Record', [], '', fields])
 
-    # Validate "Properties" for consistency with Shapes
+    # Validate redundant "Properties" files for consistency with Class properties
     for p in props:
         try:
             if template['Properties'][p[0]]['meta']['Range'] != p[1]:
@@ -198,11 +259,13 @@ if __name__ == '__main__':
 
     # Convert "Vocabularies" sections to Enumerated type definitions
     for mt in template['Vocabularies'].values():
-        cx = {v: n for n, v in enumerate(mt['Vocabulary Entries']['head'])}
         items = []
-        for fn, fv in enumerate(mt['Vocabulary Entries']['body'], start=1):
-            items.append([fn, fv[cx['Entry Value']], fv[cx['Entry Description']]])
-        schema['types'].append([mt['meta']['name'], 'Enumerated', [], '', items])
+        sect = mt.get('Entries', {})
+        if not sect:
+            print(f'Missing entries section - {mt["Metadata"]["name"]}')
+        for fn, fv in enumerate(sect.items(), start=1):
+            items.append([fn, fv[0], fv[1]])
+        schema['types'].append([mt['Metadata']['name'], 'Enumerated', [], '', items])
 
     # Generate information model (.jadn, .jidl) and JSON Schema (.json)
     # TODO: generate XML schema (.xsd), YAML, spreadsheet, Tag:Value, etc.
@@ -210,7 +273,10 @@ if __name__ == '__main__':
     os.makedirs(outdir, exist_ok=True)
     jadn.dump(schema, os.path.join(outdir, OUTPUT_FILE + '.jadn'))
     jadn.convert.jidl_dump(schema, os.path.join(outdir, OUTPUT_FILE + '.jidl'))
-    jadn.translate.json_schema_dump(schema, os.path.join(outdir, OUTPUT_FILE + '.json'))
+    # jadn.translate.json_schema_dump(schema, os.path.join(outdir, OUTPUT_FILE + '.json'))
 
     # Check for completeness
-    print('\n', '\n'.join([f'{k:>15}: {v}' for k, v in jadn.analyze(jadn.check(schema)).items()]))
+    try:
+        print('\n', '\n'.join([f'{k:>15}: {v}' for k, v in jadn.analyze(jadn.check(schema)).items()]))
+    except ValueError as e:
+        print(f'\n{e}')
