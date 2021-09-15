@@ -4,6 +4,7 @@ import os
 import re
 from collections import defaultdict
 from urllib.request import urlopen, Request
+from urllib.parse import urlparse
 from urllib.error import HTTPError
 
 """
@@ -12,7 +13,9 @@ Generate JADN information model and JSON serialization from SPDXv3 template file
 
 TEMPLATE_ROOT_DIR = os.path.join('..', 'spec-v3-template', 'model')
 TEMPLATE_ROOT_REPO = 'https://api.github.com/repos/spdx/spec-v3-template/contents/model'
-BASE = TEMPLATE_ROOT_REPO
+
+BASE = TEMPLATE_ROOT_DIR           # Select filesystem or repo source
+FILE_ROOT = TEMPLATE_ROOT_DIR if BASE == TEMPLATE_ROOT_DIR else ''   # Derived when first file is found
 
 OUTPUT_DIR = 'Out'
 OUTPUT_FILE = 'spdxv3-from-list-template'
@@ -76,6 +79,7 @@ def list_dir(dirname: str) -> dict:
     :return: dict {files: [DirEntry*], dirs: [DirEntry*]}
     Each list item is an os.DirEntry structure containing path and name attributes
     """
+    global FILE_ROOT
     files, dirs = [], []
     if dirname.startswith('https://'):
         with urlopen(Request(dirname, headers=AUTH)) as d:
@@ -83,6 +87,9 @@ def list_dir(dirname: str) -> dict:
                 url = 'url' if dl['type'] == 'dir' else 'download_url'
                 entry = WebDirEntry(dl['name'], dl[url])
                 (dirs if dl['type'] == 'dir' else files).append(entry)
+                if url == 'download_url' and not FILE_ROOT:
+                    model = urlparse(dl["url"]).path.removeprefix(urlparse(BASE).path)
+                    FILE_ROOT = dl["download_url"].removesuffix(model)
     else:
         with os.scandir(dirname) as dlist:
             for entry in dlist:
@@ -159,8 +166,11 @@ def load_template_from_list_dirs(rootdir: str) -> dict:
     :param rootdir: top level in directory hierarchy
     """
 
-    def _f(path: str) -> str:
+    def _d(path: str) -> str:
         return path.removeprefix(BASE)
+
+    def _f(path: str) -> str:
+        return path.removeprefix(FILE_ROOT)
 
     templ = dd()
     t1 = list_dir(rootdir)
@@ -174,10 +184,10 @@ def load_template_from_list_dirs(rootdir: str) -> dict:
             templ[d1.name][CATEGORY_METADATA][fname] = scan_template_file(_f(f2.path), doc, CATEGORY_METADATA, fname)
         for d2 in t2['dirs']:
             if d2.name not in MODEL_DIRS:
-                raise ValueError(f'{_f(d2.path)} -- unexpected directory, not in {MODEL_DIRS}')
+                raise ValueError(f'{_d(d2.path)} -- unexpected directory, not in {MODEL_DIRS}')
             t3 = list_dir(d2.path)
             for d3 in t3['dirs']:
-                raise ValueError(f'{_f(d3.path)} -- unexpected directory at leaf level')
+                raise ValueError(f'{_d(d3.path)} -- unexpected directory at leaf level')
             for f3 in t3['files']:
                 if f3.name.startswith('_'):
                     print(f'  {_f(f3.path)} -- _filename ignored')
