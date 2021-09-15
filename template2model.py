@@ -1,7 +1,10 @@
 import jadn
+import json
 import os
 import re
 from collections import defaultdict
+from urllib.request import urlopen, Request
+from urllib.error import HTTPError
 
 """
 Generate JADN information model and JSON serialization from SPDXv3 template files
@@ -9,12 +12,22 @@ Generate JADN information model and JSON serialization from SPDXv3 template file
 
 TEMPLATE_ROOT_DIR = os.path.join('..', 'spec-v3-template', 'model')
 TEMPLATE_ROOT_REPO = 'https://api.github.com/repos/spdx/spec-v3-template/contents/model'
-BASE = TEMPLATE_ROOT_DIR
+BASE = TEMPLATE_ROOT_REPO
 
 OUTPUT_DIR = 'Out'
 OUTPUT_FILE = 'spdxv3-from-list-template'
 MODEL_DIRS = ('Classes', 'Properties', 'Vocabularies')
 CATEGORY_METADATA = '.'
+AUTH = {'Authorization': 'token ' + os.environ['GitHubToken']}      # GitHub public_repo personal access token
+
+
+class WebDirEntry:
+    """
+    Fake os.DirEntry type for GitHub filesystem
+    """
+    def __init__(self, name, path):
+        self.name = name
+        self.path = path
 
 
 def dd():
@@ -65,7 +78,11 @@ def list_dir(dirname: str) -> dict:
     """
     files, dirs = [], []
     if dirname.startswith('https://'):
-        pass
+        with urlopen(Request(dirname, headers=AUTH)) as d:
+            for dl in json.loads(d.read().decode()):
+                url = 'url' if dl['type'] == 'dir' else 'download_url'
+                entry = WebDirEntry(dl['name'], dl[url])
+                (dirs if dl['type'] == 'dir' else files).append(entry)
     else:
         with os.scandir(dirname) as dlist:
             for entry in dlist:
@@ -74,8 +91,12 @@ def list_dir(dirname: str) -> dict:
 
 
 def read_file(path: str) -> str:
-    with open(path) as fp:
-        doc = fp.read()
+    if path.startswith('https://'):
+        with urlopen(Request(path, headers=AUTH)) as fp:
+            doc = fp.read().decode()
+    else:
+        with open(path) as fp:
+            doc = fp.read()
     return doc
 
 
@@ -105,7 +126,7 @@ def scan_template_file(fpath: str, file: str, category: str, fname: str) -> dict
                     # default property values from top-level "Defaults.md"
                     cdefault = {'id': '${NAMESPACE_id}/' + fname, 'Instantiability': 'Concrete', 'Status': 'Stable'}
                     tval[section].update(cdefault if category == 'Classes' else {})
-            elif m := re.match(r'^-\s+(.+)\s*$', line):
+            elif m := re.match(r'^[-*]\s+(.+)\s*$', line):
                 li1 = m.group(1)
                 if section in ('Metadata', 'Entries'):
                     k, v = li1.split(':', maxsplit=1)
@@ -113,7 +134,7 @@ def scan_template_file(fpath: str, file: str, category: str, fname: str) -> dict
                 elif section == 'Properties':
                     pdefault = {'minCount': 0, 'maxCount': '*'} if category == 'Classes' else {}
                     tval[section].update({li1: pdefault})
-            elif m := re.match(r'^\s+-\s+(.+)\s*$', line):
+            elif m := re.match(r'^\s+[-*]\s+(.+)\s*$', line):
                 li2 = m.group(1)
                 if section == 'Properties':
                     if ':' in li2:
@@ -144,7 +165,7 @@ def load_template_from_list_dirs(rootdir: str) -> dict:
     templ = dd()
     t1 = list_dir(rootdir)
     for f1 in t1['files']:
-        print(f'  {_f(f1.path)} -- file at level 1 ignored')
+        print(f'  {_f(f1.path)} -- file at root level ignored')
     for d1 in t1['dirs']:
         t2 = list_dir(d1.path)
         for f2 in t2['files']:
@@ -172,63 +193,62 @@ if __name__ == '__main__':
 
     # Load data from directory tree of individual files
     print(f'Scanning template files from "{BASE}"')
-    package = 'Core'
-    template = load_template_from_list_dirs(BASE)[package]
+    templates = load_template_from_list_dirs(BASE)
+
     print(f'\nConverting class model to information model in directory "{OUTPUT_DIR}"')
+    for package, template in templates.items():
+        if package != 'Core':
+            continue            # Ignore other packages until template has real data
 
-    # Ignore other packages until populated with real model data
-
-    # Make up a Core namespace until the template defines it
-    try:
-        namespace = template[CATEGORY_METADATA][package]['Metadata']['id']
-    except KeyError:
-        namespace = 'http://foo.com/bar'
-    schema = {'info': {'package': namespace},
-              'types': []}
-
-    # Convert Class Properties (shape) sections to Record type definitions
-    props = []
-    for mt in template['Classes'].values():
-        fields = []
-        sect = mt.get('Properties', {})
-        if not sect:
-            print(f'Missing properties section - {mt["Metadata"]["name"]}')
-        for fn, fv in enumerate(sect.items(), start=1):
-            ftype = fv[1].get('type', '')
-            if not ftype:
-                print(f'Missing type - {mt["Metadata"]["name"]}:{fv[0]}')
-            opts = multopts(fv[1]['minCount'], fv[1]['maxCount'])
-            fields.append([fn, fv[0], fieldtype(ftype), opts, ''])
-            props.append([fv[0], ftype, ''])
-        schema['types'].append([mt['Metadata']['name'], 'Record', [], '', fields])
-
-    # Validate redundant "Properties" files for consistency with Class properties
-    for p in props:
         try:
-            if template['Properties'][p[0]]['meta']['Range'] != p[1]:
-                print(f'{str(p):40} != {template["Properties"][p[0]]["meta"]}')
+            namespace = template[CATEGORY_METADATA][package]['Metadata']['id']
         except KeyError:
-            print(f'No Property {p[0]}')
+            namespace = 'http://foo.com/' + package
+        schema = {'info': {'package': namespace}, 'types': []}
 
-    # Convert "Vocabularies" sections to Enumerated type definitions
-    for mt in template['Vocabularies'].values():
-        items = []
-        sect = mt.get('Entries', {})
-        if not sect:
-            print(f'Missing entries section - {mt["Metadata"]["name"]}')
-        for fn, fv in enumerate(sect.items(), start=1):
-            items.append([fn, fv[0], fv[1]])
-        schema['types'].append([mt['Metadata']['name'], 'Enumerated', [], '', items])
+        # Convert Class Properties (shape) sections to Record type definitions
+        props = []
+        for mt in template['Classes'].values():
+            fields = []
+            sect = mt.get('Properties', {})
+            if not sect:
+                print(f'Missing properties section - {mt["Metadata"]["name"]}')
+            for fn, fv in enumerate(sect.items(), start=1):
+                ftype = fv[1].get('type', '')
+                if not ftype:
+                    print(f'Missing type - {mt["Metadata"]["name"]}:{fv[0]}')
+                opts = multopts(fv[1]['minCount'], fv[1]['maxCount'])
+                fields.append([fn, fv[0], fieldtype(ftype), opts, ''])
+                props.append([fv[0], ftype, ''])
+            schema['types'].append([mt['Metadata']['name'], 'Record', [], '', fields])
 
-    # Generate information model (.jadn, .jidl) and JSON Schema (.json)
-    # TODO: generate XML schema (.xsd), YAML, spreadsheet, Tag:Value, etc.
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    jadn.dump(schema, os.path.join(OUTPUT_DIR, OUTPUT_FILE + '.jadn'))
-    jadn.convert.jidl_dump(schema, os.path.join(OUTPUT_DIR, OUTPUT_FILE + '.jidl'))
-    # jadn.translate.json_schema_dump(schema, os.path.join(OUTPUT_DIR, OUTPUT_FILE + '.json'))
+        # Validate redundant "Properties" files for consistency with Class properties
+        for p in props:
+            try:
+                if template['Properties'][p[0]]['meta']['Range'] != p[1]:
+                    print(f'{str(p):40} != {template["Properties"][p[0]]["meta"]}')
+            except KeyError:
+                print(f'No Property {p[0]}')
 
-    # Check for completeness
-    try:
-        print('\n', '\n'.join([f'{k:>15}: {v}' for k, v in jadn.analyze(jadn.check(schema)).items()]))
-    except ValueError as e:
-        print(f'\n{e}')
+        # Convert "Vocabularies" sections to Enumerated type definitions
+        for mt in template['Vocabularies'].values():
+            items = []
+            sect = mt.get('Entries', {})
+            if not sect:
+                print(f'Missing entries section - {mt["Metadata"]["name"]}')
+            for fn, fv in enumerate(sect.items(), start=1):
+                items.append([fn, fv[0], fv[1]])
+            schema['types'].append([mt['Metadata']['name'], 'Enumerated', [], '', items])
+
+        # Generate information model (.jadn, .jidl) and JSON Schema (.json)
+        # TODO: generate XML schema (.xsd), YAML, spreadsheet, Tag:Value, etc.
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
+        jadn.dump(schema, os.path.join(OUTPUT_DIR, OUTPUT_FILE + '.jadn'))
+        jadn.convert.jidl_dump(schema, os.path.join(OUTPUT_DIR, OUTPUT_FILE + '.jidl'))
+        jadn.translate.json_schema_dump(schema, os.path.join(OUTPUT_DIR, OUTPUT_FILE + '.json'))
+
+        # Check for completeness
+        try:
+            print('\n', '\n'.join([f'{k:>15}: {v}' for k, v in jadn.analyze(jadn.check(schema)).items()]))
+        except ValueError as e:
+            print(f'\n{e}')
