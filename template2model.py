@@ -13,9 +13,7 @@ Generate JADN information model and JSON serialization from SPDXv3 template file
 
 TEMPLATE_ROOT_DIR = os.path.join('..', 'spec-v3-template', 'model')
 TEMPLATE_ROOT_REPO = 'https://api.github.com/repos/spdx/spec-v3-template/contents/model'
-
-BASE = TEMPLATE_ROOT_DIR           # Select filesystem or repo source
-FILE_ROOT = TEMPLATE_ROOT_DIR if BASE == TEMPLATE_ROOT_DIR else ''   # Derived when first file is found
+TEMPLATE_ROOT = TEMPLATE_ROOT_REPO           # Select source of template files
 
 OUTPUT_DIR = 'Out'
 OUTPUT_FILE = 'spdxv3-from-list-template'
@@ -28,9 +26,10 @@ class WebDirEntry:
     """
     Fake os.DirEntry type for GitHub filesystem
     """
-    def __init__(self, name, path):
+    def __init__(self, name, path, url):
         self.name = name
         self.path = path
+        self.url = url
 
 
 def dd():
@@ -77,19 +76,17 @@ def list_dir(dirname: str) -> dict:
 
     :param dirname: str - a filesystem path or GitHub API URL
     :return: dict {files: [DirEntry*], dirs: [DirEntry*]}
-    Each list item is an os.DirEntry structure containing path and name attributes
+    Local Filesystem: Each list item is an os.DirEntry structure containing name and path attributes
+    GitHub Filesystem: Each list item has name, path, and url (download URL) attributes
     """
-    global FILE_ROOT
+
     files, dirs = [], []
     if dirname.startswith('https://'):
         with urlopen(Request(dirname, headers=AUTH)) as d:
             for dl in json.loads(d.read().decode()):
                 url = 'url' if dl['type'] == 'dir' else 'download_url'
-                entry = WebDirEntry(dl['name'], dl[url])
+                entry = WebDirEntry(dl['name'], dl['url'], dl[url])
                 (dirs if dl['type'] == 'dir' else files).append(entry)
-                if url == 'download_url' and not FILE_ROOT:
-                    model = urlparse(dl["url"]).path.removeprefix(urlparse(BASE).path)
-                    FILE_ROOT = dl["download_url"].removesuffix(model)
     else:
         with os.scandir(dirname) as dlist:
             for entry in dlist:
@@ -151,10 +148,10 @@ def scan_template_file(fpath: str, file: str, category: str, fname: str) -> dict
                         print(f'  {fpath} line {ln} {section}/{li1} -- bad data: "{li2}"')
             elif section not in ('Description', 'Summary'):
                 print(f'  {fpath} line {ln} -- Unrecognized data: "{line}"')
-    missing = {CATEGORY_METADATA: set(('Metadata',)),
-               'Classes': set(('Metadata', 'Properties')),
-               'Properties': set(('Metadata',)),
-               'Vocabularies': set(('Metadata', 'Entries'))}[category] - set(tval)
+    missing = { CATEGORY_METADATA: set(('Metadata',)),
+                'Classes': set(('Metadata', 'Properties')),
+                'Properties': set(('Metadata',)),
+                'Vocabularies': set(('Metadata', 'Entries'))}[category] - set(tval)
     if missing:
         print(f'  {fpath} -- Missing required section: {missing}')
     return dict(tval)
@@ -166,11 +163,21 @@ def load_template_from_list_dirs(rootdir: str) -> dict:
     :param rootdir: top level in directory hierarchy
     """
 
+    """
+    global FILE_ROOT
+    if url == 'download_url' and not FILE_ROOT:
+        model = urlparse(dl["url"]).path.removeprefix(urlparse(TEMPLATE_ROOT).path)
+        FILE_ROOT = dl["download_url"].removesuffix(model)
+    """
+
     def _d(path: str) -> str:
-        return path.removeprefix(BASE)
+        print('***dir: ', path)
+        return path.removeprefix(rootdir)
 
     def _f(path: str) -> str:
-        return path.removeprefix(FILE_ROOT)
+        print('***file: ', path)
+        model = urlparse(path).path.removeprefix(urlparse(rootdir).path)
+        return path.removeprefix(path.removesuffix(model))
 
     templ = dd()
     t1 = list_dir(rootdir)
@@ -202,8 +209,8 @@ if __name__ == '__main__':
     print(f'Installed JADN version: {jadn.__version__}\n')
 
     # Load data from directory tree of individual files
-    print(f'Scanning template files from "{BASE}"')
-    templates = load_template_from_list_dirs(BASE)
+    print(f'Scanning template files from "{TEMPLATE_ROOT}"')
+    templates = load_template_from_list_dirs(TEMPLATE_ROOT)
 
     print(f'\nConverting class model to information model in directory "{OUTPUT_DIR}"')
     for package, template in templates.items():
