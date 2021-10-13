@@ -19,12 +19,12 @@ Document = Record
    3 specVersion   SemVer     // (in all elements?)
    4 profiles      ProfileIdentifier [1..*]  // (in all elements?)
    5 dataLicense   LicenseId  // (in all elements?) optional?
-   6 elements      IdString [1..*]
+   6 elements      IRI [1..*]
 
 Artifact = Record
    1 element Element
    2 artifactUrl URI [0..*]
-   3 originator IdString [0..*]     // link(identity)
+   3 originator Link(Element) [0..*]     // link(identity)
    4 type ArtifactType
 
 Identity = Record
@@ -34,8 +34,8 @@ Identity = Record
 
 Relationship = Record
    1 element Element
-   2 from IdRef
-   3 to IdRef [1..*]
+   2 from Link(Element)
+   3 to Link(Element) [1..*]
    4 type RelationshipType
    5 completeness RelationshipCompleteness optional
 
@@ -45,9 +45,9 @@ Annotation = Record
    3 statement String optional
 
 Element = Record
-   1 id IdString
+   1 id Key(IRI)
    2 createdWhen DateTime
-   3 createdBy IdString [1..*]  // link(identity)
+   3 createdBy Link(Element) [1..*]  // link(identity)
    4 verifiedUsing IntegrityMethod [0..*]
    5 externalReference ExternalReference [0..*]
    6 name String optional
@@ -62,8 +62,8 @@ ArtifactType = Choice
   3 snippet Snippet
 
 Package = Record
-  1 rootElement IdString    // link(artifact)
-  2 elements IdString [1..*]    // link(artifact)
+  1 rootElement Link(Element)    // link(artifact)
+  2 elements Link(Element) [1..*]    // link(artifact)
   3 type PackageType
 
 PackageType = Choice
@@ -110,14 +110,14 @@ Extension = Record
 
 ExternalReference = Record
   1 namespace URI
-  2 externalId IdString
+  2 externalId IRI
   3 type ExternalReferenceType
 
 DateTime = Integer /datetime-ms
 
-IdString = String
+// IdRef = String  // [URI #] IdString
 
-IdRef = String  // [URI #] IdString
+IRI = String /uri
 
 LicenseId = Enumerated  // From license list
 

@@ -1,12 +1,12 @@
 """
 Translate each schema file in Source directory to multiple formats in Out directory
 """
+import jadn
 import os
 import shutil
-import jadn
 from typing import NoReturn
 
-SOURCE_DIR = 'Schemas'
+SCHEMA_DIR = 'Schemas'
 OUTPUT_DIR = 'Out'
 
 
@@ -22,20 +22,19 @@ def translate(filename: str, sdir: str, odir: str) -> NoReturn:
         print(f'Unsupported schema format: {filename}')
         return
 
-    print(f'{filename:}:')
     schema = loader(os.path.join(sdir, filename))
+    print(f'{filename:}:')
     print('\n'.join([f'{k:>15}: {v}' for k, v in jadn.analyze(jadn.check(schema)).items()]))
 
-    jadn.convert.dot_dump(schema, os.path.join(odir, fn + '.dot'), style={'links': True})
-    jadn.convert.plant_dump(schema, os.path.join(odir, fn + '.puml'), style={'links': True})
-    cols = {'desc': 48, 'page': 120}    # specify comment position and page width to truncate
-    jadn.convert.jidl_dump(schema, os.path.join(odir, fn + '.jidl'), style=cols)
-    jadn.convert.html_dump(schema, os.path.join(odir, fn + '.html'))
-    jadn.convert.table_dump(schema, os.path.join(odir, fn + '.md'))
-    jadn.translate.json_schema_dump(schema, os.path.join(odir, fn + '.json'))
     jadn.dump(schema, os.path.join(odir, fn + '.jadn'))
     jadn.dump(jadn.transform.unfold_extensions(jadn.transform.strip_comments(schema)),
               os.path.join(odir, fn + '_core.jadn'))
+    jadn.convert.dot_dump(schema, os.path.join(odir, fn + '.dot'), style={'links': True})
+    jadn.convert.plant_dump(schema, os.path.join(odir, fn + '.puml'), style={'links': True, 'detail': 'logical'})
+    jadn.convert.jidl_dump(schema, os.path.join(odir, fn + '.jidl'), style={'desc': 48, 'page': 120})
+    jadn.convert.html_dump(schema, os.path.join(odir, fn + '.html'))
+    jadn.convert.table_dump(schema, os.path.join(odir, fn + '.md'))
+    jadn.translate.json_schema_dump(schema, os.path.join(odir, fn + '.json'))
 
 
 if __name__ == '__main__':
@@ -43,5 +42,5 @@ if __name__ == '__main__':
     css_dir = os.path.join(OUTPUT_DIR, 'css')
     os.makedirs(css_dir, exist_ok=True)
     shutil.copy(os.path.join(jadn.data_dir(), 'dtheme.css'), css_dir)
-    for f in os.listdir(SOURCE_DIR):
-        translate(f, SOURCE_DIR, OUTPUT_DIR)
+    for f in os.listdir(SCHEMA_DIR):
+        translate(f, SCHEMA_DIR, OUTPUT_DIR)

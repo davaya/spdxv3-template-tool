@@ -8,29 +8,17 @@ from urllib.parse import urlparse
 from urllib.error import HTTPError
 
 """
-Generate JADN information model and JSON serialization from SPDXv3 template files
+Generate JADN information model and JSON serialization schema from SPDXv3 template files
 """
 
 TEMPLATE_ROOT_DIR = os.path.join('..', 'spec-v3-template', 'model')
 TEMPLATE_ROOT_REPO = 'https://api.github.com/repos/spdx/spec-v3-template/contents/model'
-
-BASE = TEMPLATE_ROOT_DIR           # Select filesystem or repo source
-FILE_ROOT = TEMPLATE_ROOT_DIR if BASE == TEMPLATE_ROOT_DIR else ''   # Derived when first file is found
+TEMPLATE_ROOT = TEMPLATE_ROOT_REPO           # Select local filesystem or GitHub repository source
 
 OUTPUT_DIR = 'Out'
 OUTPUT_FILE = 'spdxv3-from-list-template'
 MODEL_DIRS = ('Classes', 'Properties', 'Vocabularies')
 CATEGORY_METADATA = '.'
-AUTH = {'Authorization': 'token ' + os.environ['GitHubToken']}      # GitHub public_repo personal access token
-
-
-class WebDirEntry:
-    """
-    Fake os.DirEntry type for GitHub filesystem
-    """
-    def __init__(self, name, path):
-        self.name = name
-        self.path = path
 
 
 def dd():
@@ -71,25 +59,31 @@ def fieldtype(typename: str) -> str:
     return tmap[typename] if typename in tmap else typename
 
 
-def list_dir(dirname: str) -> dict:
+def list_dir(dirname: str, headers: dict = {}) -> dict:
     """
     Return a dict listing the files and directories in a directory on local filesystem or GitHub repo.
 
     :param dirname: str - a filesystem path or GitHub API URL
-    :return: dict {files: [DirEntry*], dirs: [DirEntry*]}
-    Each list item is an os.DirEntry structure containing path and name attributes
+    :param headers: dict - optional HTTP headers to be included with request
+    :return: dict {files: [DirEntry], dirs: [DirEntry]}
+    Each DirEntry list item is:
+      local: os.DirEntry structure with name and path attributes
+      web: analogous structure with name, path, and url attributes
     """
-    global FILE_ROOT
+
+    class WebDirEntry:
+        def __init__(self, name, path, d_url):
+            self.name = name
+            self.path = path  # 'url' = GitHub API path
+            self.url = d_url  # 'download_url' = file content
+
     files, dirs = [], []
     if dirname.startswith('https://'):
-        with urlopen(Request(dirname, headers=AUTH)) as d:
+        with urlopen(Request(dirname, headers=headers)) as d:
             for dl in json.loads(d.read().decode()):
                 url = 'url' if dl['type'] == 'dir' else 'download_url'
-                entry = WebDirEntry(dl['name'], dl[url])
+                entry = WebDirEntry(dl['name'], dl['url'], dl[url])
                 (dirs if dl['type'] == 'dir' else files).append(entry)
-                if url == 'download_url' and not FILE_ROOT:
-                    model = urlparse(dl["url"]).path.removeprefix(urlparse(BASE).path)
-                    FILE_ROOT = dl["download_url"].removesuffix(model)
     else:
         with os.scandir(dirname) as dlist:
             for entry in dlist:
@@ -97,9 +91,9 @@ def list_dir(dirname: str) -> dict:
     return {'files': files, 'dirs': dirs}
 
 
-def read_file(path: str) -> str:
+def read_file(path: str, headers: dict = {}) -> str:
     if path.startswith('https://'):
-        with urlopen(Request(path, headers=AUTH)) as fp:
+        with urlopen(Request(path, headers=headers)) as fp:
             doc = fp.read().decode()
     else:
         with open(path) as fp:
@@ -110,6 +104,7 @@ def read_file(path: str) -> str:
 def scan_template_file(fpath: str, file: str, category: str, fname: str) -> dict:
     """
     Parse an SPDXv3 template markdown file into a structured object
+    :param fpath: file name (for messages)
     :param file: markdown content
     :param category: class type (one of "Classes, "Properties", "Vocabularies)
     :param fname: name of class
@@ -167,32 +162,39 @@ def load_template_from_list_dirs(rootdir: str) -> dict:
     """
 
     def _d(path: str) -> str:
-        return path.removeprefix(BASE)
+        return path.removeprefix(rootdir)
 
     def _f(path: str) -> str:
-        return path.removeprefix(FILE_ROOT)
+        return urlparse(path.removeprefix(rootdir)).path    # Strip any ?query or #fragment components
 
     templ = dd()
-    t1 = list_dir(rootdir)
+    if rootdir.startswith('https://'):
+        f_attr = 'url'
+        auth_header = {'Authorization': 'token ' + os.environ['GitHubToken']}      # GitHub personal access token
+    else:
+        f_attr = 'path'
+        auth_header = {}
+
+    t1 = list_dir(rootdir, auth_header)
     for f1 in t1['files']:
         print(f'  {_f(f1.path)} -- file at root level ignored')
     for d1 in t1['dirs']:
-        t2 = list_dir(d1.path)
+        t2 = list_dir(d1.path, auth_header)
         for f2 in t2['files']:
-            doc = read_file(f2.path)
+            doc = read_file(getattr(f2, f_attr), auth_header)
             fname = os.path.splitext(f2.name)[0]
             templ[d1.name][CATEGORY_METADATA][fname] = scan_template_file(_f(f2.path), doc, CATEGORY_METADATA, fname)
         for d2 in t2['dirs']:
             if d2.name not in MODEL_DIRS:
                 raise ValueError(f'{_d(d2.path)} -- unexpected directory, not in {MODEL_DIRS}')
-            t3 = list_dir(d2.path)
+            t3 = list_dir(d2.path, auth_header)
             for d3 in t3['dirs']:
                 raise ValueError(f'{_d(d3.path)} -- unexpected directory at leaf level')
             for f3 in t3['files']:
                 if f3.name.startswith('_'):
                     print(f'  {_f(f3.path)} -- _filename ignored')
                 else:
-                    doc = read_file(f3.path)
+                    doc = read_file(getattr(f3, f_attr), auth_header)
                     fname = os.path.splitext(f3.name)[0]
                     templ[d1.name][d2.name][fname] = scan_template_file(_f(f3.path), doc, d2.name, fname)
     return dict(templ)
@@ -201,11 +203,10 @@ def load_template_from_list_dirs(rootdir: str) -> dict:
 if __name__ == '__main__':
     print(f'Installed JADN version: {jadn.__version__}\n')
 
-    # Load data from directory tree of individual files
-    print(f'Scanning template files from "{BASE}"')
-    templates = load_template_from_list_dirs(BASE)
+    print(f'Loading logical model from "{TEMPLATE_ROOT}"')
+    templates = load_template_from_list_dirs(TEMPLATE_ROOT)
 
-    print(f'\nConverting class model to information model in directory "{OUTPUT_DIR}"')
+    print(f'\nConverting logical model to information model in directory "{OUTPUT_DIR}"')
     for package, template in templates.items():
         if package != 'Core':
             continue            # Ignore other packages until template has real data
