@@ -1,0 +1,75 @@
+{
+  "id": "http://acme.com/spdx/path/to/elements/p1",
+  "name": "package-1",
+  "type": {
+    "package": {
+      "created": {
+        "by": "i1",
+        "when": "2021-11-09T14:39:23+00:00"
+      },
+      "baseIRI": "http://acme.com/spdx/path/to/elements/",
+      "elements": [
+        {
+          "id": "i1",
+          "name": "Gary Wright",
+          "type": {
+            "identity": {
+              "type": {
+                "person": {}
+              },
+              "email": "gary@acme.com"
+            }
+          }
+        },
+        {
+          "id": "p1",
+          "name": "Package1",
+          "type": {
+            "package": {
+              "collection": {
+                "elementIds": ["p3", "acme:p1", "acme:f1", "acme:p3"]
+              }
+            }
+          }
+        },
+        {
+          "id": "p3",
+          "name": "Package3",
+          "type": {
+            "package": {
+              "collection": {
+                "elementIds": ["f5", "f2"]
+              }
+            }
+          }
+        },
+        {"id": "f2"},
+        {
+          "id": "p6",
+          "name": "Package6",
+          "type": {
+            "package": {
+              "collection": {
+                "elementIds": ["f6", "p7"]
+              }
+            }
+          }
+        },
+        {"id": "f5"},
+        {
+          "id": "p7",
+          "name": "Package7",
+          "type": {
+            "package": {
+              "collection": {
+                "elementIds": ["f7"]
+              }
+            }
+          }
+        },
+        {"id": "f6"},
+        {"id": "f7"}
+      ]
+    }
+  }
+}

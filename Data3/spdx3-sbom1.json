@@ -1,0 +1,83 @@
+{
+  "id": "http://sbom.auditguys.com/2021/nqMR92jAmlH424hJ/s1",
+  "name": "sbom-1",
+  "type": {
+    "sbom": {
+      "created": {
+        "by": "i1",
+        "when": "2021-11-10T14:39:23+00:00"
+      },
+      "baseIRI": "http://sbom.auditguys.com/2021/nqMR92jAmlH424hJ/",
+      "prefixes": {
+        "acme": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8"
+      },
+      "elements": [
+        {
+          "id": "i1",
+          "name": "Steven Miller",
+          "type": {
+            "identity": {
+              "type": {
+                "person": {}
+              },
+              "email": "steve@auditguys.com"
+            }
+          }
+        },
+        {
+          "id": "p1",
+          "name": "Package1",
+          "type": {
+            "package": {
+              "collection": {
+                "elementIds": ["p3", "acme:p1", "acme:f1", "acme:p3"]
+              }
+            }
+          }
+        },
+        {
+          "id": "p3",
+          "name": "Package3",
+          "type": {
+            "package": {
+              "collection": {
+                "elementIds": ["f5", "f2"]
+              }
+            }
+          }
+        },
+        {"id": "f2"},
+        {
+          "id": "p6",
+          "name": "Package6",
+          "type": {
+            "package": {
+              "collection": {
+                "elementIds": ["f6", "p7"]
+              }
+            }
+          }
+        },
+        {"id": "f5"},
+        {
+          "id": "p7",
+          "name": "Package7",
+          "type": {
+            "package": {
+              "collection": {
+                "elementIds": ["f7"]
+              }
+            }
+          }
+        },
+        {"id": "f6"},
+        {"id": "f7"}
+      ],
+      "elementRefs": [
+        {"id": "acme:p1", "verifiedUsing": {"md5": "6be192b1243a593ab0b690230c3ba842"}},
+        {"id": "acme:p3", "verifiedUsing": {"md5": "fdfd284f69c52834b775f6f87d14b30e"}},
+        {"id": "acme:f1", "verifiedUsing": {"md5": "505853425403a6782ac0001b1dfbb042"}}
+      ]
+    }
+  }
+}

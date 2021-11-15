@@ -10,8 +10,8 @@ SCHEMA_DIR = 'Schemas'
 OUTPUT_DIR = 'Out'
 
 
-def translate(filename: str, sdir: str, odir: str) -> NoReturn:
-    fn, ext = os.path.splitext(filename)
+def load_any(path: str) -> dict:
+    fn, ext = os.path.splitext(path)
     try:
         loader = {
             '.jadn': jadn.load,
@@ -19,18 +19,24 @@ def translate(filename: str, sdir: str, odir: str) -> NoReturn:
             '.html': jadn.convert.html_load
         }[ext]
     except KeyError:
-        print(f'Unsupported schema format: {filename}')
+        if os.path.isfile(path):
+            raise ValueError(f'Unsupported schema format: {path}')
         return
+    return loader(path)
 
-    schema = loader(os.path.join(sdir, filename))
+
+def translate(filename: str, sdir: str, odir: str) -> NoReturn:
+    if not (schema := load_any(os.path.join(sdir, filename))):
+        return
     print(f'{filename:}:')
     print('\n'.join([f'{k:>15}: {v}' for k, v in jadn.analyze(jadn.check(schema)).items()]))
 
+    fn, ext = os.path.splitext(filename)
     jadn.dump(schema, os.path.join(odir, fn + '.jadn'))
     jadn.dump(jadn.transform.unfold_extensions(jadn.transform.strip_comments(schema)),
               os.path.join(odir, fn + '_core.jadn'))
     jadn.convert.dot_dump(schema, os.path.join(odir, fn + '.dot'), style={'links': True})
-    jadn.convert.plant_dump(schema, os.path.join(odir, fn + '.puml'), style={'links': True, 'detail': 'logical'})
+    jadn.convert.plant_dump(schema, os.path.join(odir, fn + '.puml'), style={'links': True, 'detail': 'information'})
     jadn.convert.jidl_dump(schema, os.path.join(odir, fn + '.jidl'), style={'desc': 48, 'page': 120})
     jadn.convert.html_dump(schema, os.path.join(odir, fn + '.html'))
     jadn.convert.table_dump(schema, os.path.join(odir, fn + '.md'))
