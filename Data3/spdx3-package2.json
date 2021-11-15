@@ -1,5 +1,5 @@
 {
-  "id": "http://acme.com/spdx/path/to/elements/p1",
+  "id": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/p1",
   "name": "package-1",
   "type": {
     "package": {
@@ -7,7 +7,7 @@
         "by": "i1",
         "when": "2021-11-09T14:39:23+00:00"
       },
-      "baseIRI": "http://acme.com/spdx/path/to/elements/",
+      "baseIRI": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/",
       "elements": [
         {
           "id": "i1",
@@ -66,9 +66,7 @@
               }
             }
           }
-        },
-        {"id": "f6"},
-        {"id": "f7"}
+        }
       ]
     }
   }
