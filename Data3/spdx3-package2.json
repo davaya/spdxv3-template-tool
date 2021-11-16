@@ -1,73 +1,91 @@
 {
   "id": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/p1",
-  "name": "package-1",
   "type": {
     "package": {
-      "created": {
-        "by": "i1",
-        "when": "2021-11-09T14:39:23+00:00"
+      "elements": ["p2", "f2", "a1"]
+    }
+  },
+  "context": {
+    "created": {
+      "by": ["i1"],
+      "when": "2021-11-09T14:39:23+00:00"
+    },
+    "baseIRI": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/",
+    "elementValues": [
+      {
+        "id": "i1",
+        "type": {
+          "identity": {
+            "type": {
+              "person": {}
+            },
+            "email": "gary@acme.com"
+          }
+        },
+        "name": "Gary Wright"
       },
-      "baseIRI": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/",
-      "elements": [
-        {
-          "id": "i1",
-          "name": "Gary Wright",
-          "type": {
-            "identity": {
-              "type": {
-                "person": {}
-              },
-              "email": "gary@acme.com"
-            }
-          }
-        },
-        {
-          "id": "p1",
-          "name": "Package1",
-          "type": {
-            "package": {
-              "collection": {
-                "elementIds": ["p3", "acme:p1", "acme:f1", "acme:p3"]
-              }
-            }
-          }
-        },
-        {
-          "id": "p3",
-          "name": "Package3",
-          "type": {
-            "package": {
-              "collection": {
-                "elementIds": ["f5", "f2"]
-              }
-            }
-          }
-        },
-        {"id": "f2"},
-        {
-          "id": "p6",
-          "name": "Package6",
-          "type": {
-            "package": {
-              "collection": {
-                "elementIds": ["f6", "p7"]
-              }
-            }
-          }
-        },
-        {"id": "f5"},
-        {
-          "id": "p7",
-          "name": "Package7",
-          "type": {
-            "package": {
-              "collection": {
-                "elementIds": ["f7"]
-              }
-            }
+      {
+        "id": "a1",
+        "type": {
+          "annotation": {
+            "type": "REVIEW",
+            "statement": "This package is awesome!"
           }
         }
-      ]
-    }
-  }
+      },
+      {
+        "id": "p2",
+        "type": {
+          "package": {
+            "elements": ["f5", "f2"]
+          }
+        },
+        "name": "Package4"
+      },
+      {
+        "id": "p3",
+        "type": {
+          "package": {
+            "elements": ["f1"]
+          }
+        },
+        "name": "Package5"
+      },
+      {
+        "id": "f1",
+        "type": {
+          "file": {
+            "contentType": "text/plain",
+            "filePurpose": ["DOCUMENTATION"],
+            "artifactUri": "http://somewhere.com/downloads/abc.md",
+            "originator": ["i1"]
+          }
+        },
+        "name": "file1"
+      },
+      {
+        "id": "f2",
+        "type": {
+          "file": {
+            "contentType": "application/vnd.microsoft.portable-executable",
+            "filePurpose": ["APPLICATION"],
+            "artifactUri": "http://somewhere.com/downloads/def.exe",
+            "originator": ["i1"]
+          }
+        }
+      },
+      {
+        "id": "r1",
+        "type": {
+          "relationship": {
+            "type": "CONTAINS",
+            "from": "p1",
+            "to": ["f2"],
+            "completeness": "INCOMPLETE"
+          }
+        }
+      }
+    ]
+  },
+  "name": "Package2"
 }

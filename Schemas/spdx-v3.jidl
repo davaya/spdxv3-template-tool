@@ -7,20 +7,32 @@ license: "CC0-1.0"
 Element = Record
   1 id Key(IRI)
   2 type ElementType
-  3 name String optional
-  4 summary String optional
-  5 description String optional
-  6 comment String optional
-  7 specVersion SemVer
-  8 created Created optional
-  9 profile ProfileIdentifier[1..*]
- 10 dataLicense LicenseId optional
- 11 verifiedUsing IntegrityMethod [0..*]    // Verifies Artifact data, not Element properties
- 12 externalReference ExternalReference [0..*]
- 13 extension Extension [0..*]  // Should be extension point "..."
+  3 context Context optional    // Required in outer serialized Element, optional in elementValues
+  4 name String optional
+  5 summary String optional
+  6 description String optional
+  7 comment String optional
+  8 specVersion SemVer optional  // required in logical model?
+  9 created Created optional    // required, default from context or explicit
+ 10 profile ProfileIdentifier[0..*]     // [1..*] in logical model?
+ 11 dataLicense LicenseId optional
+ 12 verifiedUsing IntegrityMethod [0..*]    // Verifies Artifact data, not Element properties.  Move to Artifact.
+ 13 externalReference ExternalReference [0..*]
+ 14 extension Extension [0..*]  // Should be extension point "..."
 
 ElementRef = Record
-  1 verifiedUsing IntegrityMethod [1..*]    // Verifies referenced Element properties
+  1 id Link(Element)
+  2 verifiedUsing IntegrityMethod    // Verifies properties of referenced Element
+
+Context = Record{1..*}
+  1 specVersion SemVer optional         // default for Element properties
+  2 created Created optional            // default
+  3 profile ProfileIdentifier optional  // default
+  4 dataLicense LicenseId optional      // default
+  5 baseIRI IRI optional
+  6 prefixes MapOf(Prefix, IRI){1..*} optional
+  7 elementValues Element [0..*]
+  8 elementRefs ElementRef [0..*]
 
 ElementType = Choice
   1 identity Identity
@@ -40,41 +52,37 @@ Identity = Record
 Annotation = Record
   1 type AnnotationType
   2 statement String optional
-  3 created Created
 
 Relationship = Record
   1 type RelationshipType
-  2 to Link(Element) [1..*]
-  3 completeness RelationshipCompleteness optional
+  2 from Link(Element)
+  3 to Link(Element) [1..*]
+  4 completeness RelationshipCompleteness optional
 
 File = Record
   1 contentType MediaType optional
   2 filePurpose SoftwarePurpose [0..*]
-  3 artifactUri ArtifactUri [0..*]
-  4 originator Identity [0..*]
+  3 artifactUri ArtifactUri optional  // move verifiedUsing from Element
+  4 originator Link(Element) [0..*]
 
 Snippet = Record
   1 location SnippetLocation
   2 snippetPurpose SoftwarePurpose [0..*]
-  3 artifactUri ArtifactUri [0..*]
-  4 originator Identity [0..*]
+  3 artifactUri ArtifactUri [0..*]  // move verifiedUsing from Element
+  4 originator Link(Element) [0..*]
 
-Collection = Record{1..*}
-  1 created Created optional
-  2 baseIRI IRI optional
-  3 prefixes MapOf(Prefix, IRI)
-  4 elements Element [0..*]
-  5 elementRefs ElementRef [0..*]
+Collection = Record
+  1 elements IRI [0..*]
 
 Package = Record
-  1 collection Collection
+  1 elements IRI [0..*]
   2 packagePurpose SoftwarePurpose [0..*]
 
 BOM = Record
-  1 collection Collection
+  1 elements IRI [0..*]
 
 SBOM = Record
-  1 collection Collection
+  1 elements IRI [0..*]
 
 Created = Record
   1 by Link(Element) [1..*]     // must be an Identity element
@@ -96,8 +104,10 @@ IntegrityMethod = Choice
   1 hashes Hashes
   2 signature PublicKeySignature    // A public key by itself is not a checksum
 
-Hashes = Map{1..*}  // Use {alg: val}, not verbose {"algorithm": alg, "hashValue": val}
-  1 sha1 Binary{20..20} /x
+Hashes = Map{1..*}
+  1 md5 Binary{16..16} /x optional
+  2 sha1 Binary{20..20} /x optional
+  3 sha256 Binary{32..32} /x optional
 
 PublicKeySignature = Record
 
@@ -130,8 +140,10 @@ SoftwarePurpose = Enumerated
  99 OTHER
 
 AnnotationType = Enumerated
+  1 REVIEW
+  9 OTHER
 
-DateTime = Integer  // /datetime_ms
+DateTime = String  // implement Integer /datetime_ms
 
 ExternalReferenceType = Enumerated
 
@@ -147,7 +159,7 @@ SemVer = String
 
 SnippetLocation = Record
 
-IRI = String /uri   // Element id
+IRI = String   // Element id:  local, prefix:local, IRI
 
 ArtifactUri = String /uri
 
