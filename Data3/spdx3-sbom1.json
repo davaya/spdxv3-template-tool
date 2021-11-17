@@ -5,114 +5,34 @@
       "elements": ["acme:f3", "p1", "p3", "f2", "p6", "f1"]
     }
   },
+  "name": "SBOM 1",
   "context": {
+    "specVersion": "3.0",
     "created": {
       "by": ["i1"],
       "when": "2021-11-10T14:39:23+00:00"
     },
+    "profile": ["Some Profile"],
+    "dataLicense": "CC0-1.0",
     "baseIRI": "http://sbom.auditguys.com/2021/nqMR92jAmlH424hJ/",
     "prefixes": {
       "acme": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8"
     },
     "elementValues": [
-      {
-        "id": "i1",
-        "type": {
-          "identity": {
-            "type": {
-              "person": {}
-            },
-            "email": "steve@auditguys.com"
-          }
-        },
-        "name": "Steven Miller"
-      },
-      {
-        "id": "p1",
-        "type": {
-          "package": {
-            "elements": ["p3", "acme:p1", "acme:f1", "acme:p3"]
-          }
-        },
-        "name": "Package1"
-      },
-      {
-        "id": "p3",
-        "name": "Package3",
-        "type": {
-          "package": {
-            "elements": ["f5", "f2"]
-          }
-        }
-      },
-      {
-        "id": "f2",
-        "type": {
-          "file": {
-            "contentType": "text/plain",
-            "filePurpose": ["DOCUMENTATION"],
-            "artifactUri": "http://somewhere.com/downloads/abc.md"
-            }
-          },
-        "name": "file2"
-      },
-      {
-        "id": "p6",
-        "type": {
-          "package": {
-            "elements": ["f6", "p7"]
-          }
-        },
-        "name": "Package6"
-      },
-      {
-        "id": "f5",
-        "type": {
-          "file": {
-            "contentType": "text/plain",
-            "filePurpose": ["DOCUMENTATION"],
-            "artifactUri": "http://somewhere.com/downloads/abc.md"
-            }
-          },
-        "name": "file5"
-      },
-      {
-        "id": "p7",
-        "type": {
-          "package": {
-            "elements": ["f7"]
-          }
-        },
-        "name": "Package7"
-      },
-      {
-        "id": "f6",
-        "type": {
-          "file": {
-            "contentType": "text/plain",
-            "filePurpose": ["DOCUMENTATION"],
-            "artifactUri": "http://somewhere.com/downloads/abc.md"
-            }
-          },
-        "name": "file6"
-      },
-      {
-        "id": "f7",
-        "type": {
-          "file": {
-            "contentType": "text/plain",
-            "filePurpose": ["DOCUMENTATION"],
-            "artifactUri": "http://somewhere.com/downloads/abc.md"
-            }
-          },
-        "name": "file7"
-      }
+      {"id": "i1", "type": {"identity": {"type": {"person": {}}, "email": "steve@auditguys.com"}}, "name": "Steven Miller"},
+      {"id": "p1", "type": {"package": {"elements": ["p3", "acme:p1", "acme:f1", "acme:p3"]}}, "name": "Package1"},
+      {"id": "p3", "type": {"package": {"elements": ["f5", "f2"]}}, "name": "Package3"},
+      {"id": "p6", "type": {"package": {"elements": ["f6", "p7"]}}, "name": "Package6"},
+      {"id": "p7", "type": {"package": {"elements": ["f7"]}}, "name": "Package7"},
+      {"id": "f2", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/abc.md"}}, "name": "file2"},
+      {"id": "f5", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/def.md"}}, "name": "file5"},
+      {"id": "f6", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/ghi.md"}}, "name": "file6"},
+      {"id": "f7", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/jkl.md"}}, "name": "file7"}
     ],
     "elementRefs": [
       {"id": "acme:p1", "verifiedUsing": {"hashes": {"md5": "6be192b1243a593ab0b690230c3ba842"}}},
       {"id": "acme:p3", "verifiedUsing": {"hashes": {"md5": "fdfd284f69c52834b775f6f87d14b30e"}}},
       {"id": "acme:f1", "verifiedUsing": {"hashes": {"md5": "505853425403a6782ac0001b1dfbb042"}}}
     ]
-  },
-  "name": "SBOM 1"
+  }
 }

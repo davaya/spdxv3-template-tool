@@ -1,33 +1,37 @@
 package: "http://spdx.org/spdx/v3/document"
-exports: ["Element"]
+exports: ["Element", "ContextElement"]
 title: "SPDX v3"
 description: "Information Model: serialization derived from SPDXv3 logical model"
 license: "CC0-1.0"
 
-Element = Record
+ContextElement = Array      // Simple serialization of Context and Element
+  1 Context     // context::
+  2 Element     // element::
+
+Element = Map
   1 id Key(IRI)
   2 type ElementType
-  3 context Context optional    // Required in outer serialized Element, optional in elementValues
-  4 name String optional
-  5 summary String optional
-  6 description String optional
-  7 comment String optional
-  8 specVersion SemVer optional  // required in logical model?
-  9 created Created optional    // required, default from context or explicit
- 10 profile ProfileIdentifier[0..*]     // [1..*] in logical model?
- 11 dataLicense LicenseId optional
- 12 verifiedUsing IntegrityMethod [0..*]    // Verifies Artifact data, not Element properties.  Move to Artifact.
- 13 externalReference ExternalReference [0..*]
- 14 extension Extension [0..*]  // Should be extension point "..."
+  3 name String optional
+  4 summary String optional
+  5 description String optional
+  6 comment String optional
+  7 specVersion SemVer optional  // required in logical model?
+  8 created Created optional    // required, default from context or explicit
+  9 profile ProfileIdentifier [0..*]     // [1..*] in logical model?
+ 10 dataLicense LicenseId optional
+ 11 verifiedUsing IntegrityMethod [0..*]    // Verifies Artifact data, not Element properties.  Move to Artifact.
+ 12 externalReference ExternalReference [0..*]
+ 13 extension Extension [0..*]  // Should be extension point "..."
+ 99 context Context optional    // not in deserialized Element, but serialized as a property analogous to JSON Cleartext Signature
 
 ElementRef = Record
   1 id Link(Element)
   2 verifiedUsing IntegrityMethod    // Verifies properties of referenced Element
 
 Context = Record{1..*}
-  1 specVersion SemVer optional         // default for Element properties
+  1 specVersion SemVer optional         // default for Element properties propagated in serialization
   2 created Created optional            // default
-  3 profile ProfileIdentifier optional  // default
+  3 profile ProfileIdentifier [0..*]    // default
   4 dataLicense LicenseId optional      // default
   5 baseIRI IRI optional
   6 prefixes MapOf(Prefix, IRI){1..*} optional
@@ -117,6 +121,30 @@ ExternalReference = Record
   1 type ExternalReferenceType
   2 locator URI
 
+DateTime = String  // implement Integer /datetime_ms
+
+MediaType = String
+
+Prefix = String{1..8}
+
+ProfileIdentifier = String
+
+SemVer = String
+
+SnippetLocation = Record
+
+IRI = String   // Element id:  local, prefix:local, absolute-IRI
+
+ArtifactUri = String /uri
+
+URI = String /uri   // External Reference locator
+
+ExternalReferenceType = Enumerated  // Unusable without defined values
+
+LicenseId = Enumerated  // From license list: referenceNumber, licenseId  // name
+ 451 Apache-2.0 // Apache License 2.0
+ 457 CC0-1.0 // Creative Commons Zero v1.0 Universal
+
 RelationshipCompleteness = Enumerated
   1 KNOWN
   2 INCOMPLETE
@@ -142,28 +170,6 @@ SoftwarePurpose = Enumerated
 AnnotationType = Enumerated
   1 REVIEW
   9 OTHER
-
-DateTime = String  // implement Integer /datetime_ms
-
-ExternalReferenceType = Enumerated
-
-LicenseId = Enumerated  // From license list
-
-MediaType = String
-
-Prefix = String{1..8}
-
-ProfileIdentifier = String
-
-SemVer = String
-
-SnippetLocation = Record
-
-IRI = String   // Element id:  local, prefix:local, IRI
-
-ArtifactUri = String /uri
-
-URI = String /uri   // External Reference locator
 
 RelationshipType = Enumerated
   0 NONE

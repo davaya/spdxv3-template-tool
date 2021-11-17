@@ -10,7 +10,7 @@ SCHEMA_DIR = 'Schemas'
 OUTPUT_DIR = 'Out'
 
 
-def load_any(path: str) -> dict:
+def load_any_schema(path: str) -> (dict, None):
     fn, ext = os.path.splitext(path)
     try:
         loader = {
@@ -26,10 +26,9 @@ def load_any(path: str) -> dict:
 
 
 def translate(filename: str, sdir: str, odir: str) -> NoReturn:
-    if not (schema := load_any(os.path.join(sdir, filename))):
+    if not (schema := load_any_schema(os.path.join(sdir, filename))):
         return
-    print(f'{filename:}:')
-    print('\n'.join([f'{k:>15}: {v}' for k, v in jadn.analyze(jadn.check(schema)).items()]))
+    print(f'{filename}:\n', '\n'.join([f'{k:>15}: {v}' for k, v in jadn.analyze(jadn.check(schema)).items()]))
 
     fn, ext = os.path.splitext(filename)
     jadn.dump(schema, os.path.join(odir, fn + '.jadn'))

@@ -5,87 +5,24 @@
       "elements": ["p2", "f2", "a1"]
     }
   },
+  "name": "Package2",
+  "specVersion": "3.0",
+  "created": {
+    "by": ["i1"],
+    "when": "2021-11-09T14:39:23+00:00"
+  },
+  "profile": ["Some Profile Name", "Another Profile"],
+  "dataLicense": "Apache-2.0",
   "context": {
-    "created": {
-      "by": ["i1"],
-      "when": "2021-11-09T14:39:23+00:00"
-    },
     "baseIRI": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/",
     "elementValues": [
-      {
-        "id": "i1",
-        "type": {
-          "identity": {
-            "type": {
-              "person": {}
-            },
-            "email": "gary@acme.com"
-          }
-        },
-        "name": "Gary Wright"
-      },
-      {
-        "id": "a1",
-        "type": {
-          "annotation": {
-            "type": "REVIEW",
-            "statement": "This package is awesome!"
-          }
-        }
-      },
-      {
-        "id": "p2",
-        "type": {
-          "package": {
-            "elements": ["f5", "f2"]
-          }
-        },
-        "name": "Package4"
-      },
-      {
-        "id": "p3",
-        "type": {
-          "package": {
-            "elements": ["f1"]
-          }
-        },
-        "name": "Package5"
-      },
-      {
-        "id": "f1",
-        "type": {
-          "file": {
-            "contentType": "text/plain",
-            "filePurpose": ["DOCUMENTATION"],
-            "artifactUri": "http://somewhere.com/downloads/abc.md",
-            "originator": ["i1"]
-          }
-        },
-        "name": "file1"
-      },
-      {
-        "id": "f2",
-        "type": {
-          "file": {
-            "contentType": "application/vnd.microsoft.portable-executable",
-            "filePurpose": ["APPLICATION"],
-            "artifactUri": "http://somewhere.com/downloads/def.exe",
-            "originator": ["i1"]
-          }
-        }
-      },
-      {
-        "id": "r1",
-        "type": {
-          "relationship": {
-            "type": "CONTAINS",
-            "from": "p1",
-            "to": ["f2"],
-            "completeness": "INCOMPLETE"
-          }
-        }
-      }
+      {"id": "p2", "type": {"package": {"elements": ["f5", "f2"]}}, "name": "Package4"},
+      {"id": "p3", "type": {"package": {"elements": ["f1"]}}, "name": "Package5"},
+      {"id": "f1", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/abc.md", "originator": ["i1"]}}, "name": "file1"},
+      {"id": "f2", "type": {"file": {"contentType": "application/vnd.microsoft.portable-executable", "filePurpose": ["APPLICATION"], "artifactUri": "http://somewhere.com/downloads/def.exe", "originator": ["i1"]}}},
+      {"id": "i1", "type": {"identity": {"type": {"person": {}}, "email": "gary@acme.com"}}, "name": "Gary Wright"},
+      {"id": "a1", "type": {"annotation": {"type": "REVIEW", "statement": "This package is awesome!"}}},
+      {"id": "r1", "type": {"relationship": {"type": "CONTAINS", "from": "p1", "to": ["f2"], "completeness": "INCOMPLETE"}}}
     ]
-  },
-  "name": "Package2"
+  }
 }
