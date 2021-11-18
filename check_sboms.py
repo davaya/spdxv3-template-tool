@@ -9,7 +9,7 @@ SCHEMA = 'Schemas/spdx-v3.jidl'
 DATA_DIR = 'Data3'
 
 
-def load_any_schema(path: str) -> (dict, None):
+def load_any(path: str) -> (dict, None):
     fn, ext = os.path.splitext(path)
     try:
         loader = {
@@ -26,7 +26,7 @@ def load_any_schema(path: str) -> (dict, None):
 
 if __name__ == '__main__':
     print(f'Installed JADN version: {jadn.__version__}\n')
-    s = load_any_schema(SCHEMA)
+    s = load_any(SCHEMA)
     sc = jadn.codec.Codec(s, verbose_rec=True, verbose_str=True)
     for f in os.listdir(DATA_DIR):
         print(f)

@@ -10,7 +10,7 @@ SCHEMA_DIR = 'Schemas'
 OUTPUT_DIR = 'Out'
 
 
-def load_any_schema(path: str) -> (dict, None):
+def load_any(path: str) -> (dict, None):
     fn, ext = os.path.splitext(path)
     try:
         loader = {
@@ -26,7 +26,7 @@ def load_any_schema(path: str) -> (dict, None):
 
 
 def translate(filename: str, sdir: str, odir: str) -> NoReturn:
-    if not (schema := load_any_schema(os.path.join(sdir, filename))):
+    if not (schema := load_any(os.path.join(sdir, filename))):
         return
     print(f'{filename}:\n', '\n'.join([f'{k:>15}: {v}' for k, v in jadn.analyze(jadn.check(schema)).items()]))
 
@@ -36,7 +36,7 @@ def translate(filename: str, sdir: str, odir: str) -> NoReturn:
               os.path.join(odir, fn + '_core.jadn'))
     jadn.convert.dot_dump(schema, os.path.join(odir, fn + '.dot'), style={'links': True})
     jadn.convert.plant_dump(schema, os.path.join(odir, fn + '.puml'), style={'links': True, 'detail': 'information'})
-    jadn.convert.jidl_dump(schema, os.path.join(odir, fn + '.jidl'), style={'desc': 48, 'page': 120})
+    jadn.convert.jidl_dump(schema, os.path.join(odir, fn + '.jidl'), style={'desc': 50})
     jadn.convert.html_dump(schema, os.path.join(odir, fn + '.html'))
     jadn.convert.table_dump(schema, os.path.join(odir, fn + '.md'))
     jadn.translate.json_schema_dump(schema, os.path.join(odir, fn + '.json'))

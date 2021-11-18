@@ -19,7 +19,7 @@ Element = Map
   8 created Created optional    // required, default from context or explicit
   9 profile ProfileIdentifier [0..*]     // [1..*] in logical model?
  10 dataLicense LicenseId optional
- 11 verifiedUsing IntegrityMethod [0..*]    // Verifies Artifact data, not Element properties.  Move to Artifact.
+ 11 verifiedUsing IntegrityMethod [0..*]    // verifies Element properties, not entities (Identity and Artifact) referenced by Elements
  12 externalReference ExternalReference [0..*]
  13 extension Extension [0..*]  // Should be extension point "..."
  99 context Context optional    // not in deserialized Element, but serialized as a property analogous to JSON Cleartext Signature
@@ -42,16 +42,18 @@ ElementType = Choice
   1 identity Identity
   2 annotation Annotation
   3 relationship Relationship
-  4 file File
-  5 snippet Snippet
-  6 collection Collection
-  7 package Package
-  8 bom BOM
-  9 sbom SBOM
+  4 document Document
+  5 file File
+  6 snippet Snippet
+  7 collection Collection
+  8 package Package
+  9 bom BOM
+ 10 sbom SBOM
 
 Identity = Record
   1 type IdentityType
   2 email String /email optional
+  3 verifiedUsing IntegrityMethod [0..*]    // Identity and Artifact entities are verified separately from Element properties
 
 Annotation = Record
   1 type AnnotationType
@@ -63,24 +65,29 @@ Relationship = Record
   3 to Link(Element) [1..*]
   4 completeness RelationshipCompleteness optional
 
+Document = Record   // File containing a serialized Element including Context
+  1 artifactUri ArtifactUri
+  2 verifiedUsing IntegrityMethod [0..*]    // verifies referenced entity
+
 File = Record
   1 contentType MediaType optional
   2 filePurpose SoftwarePurpose [0..*]
-  3 artifactUri ArtifactUri optional  // move verifiedUsing from Element
+  3 artifactUri ArtifactUri optional
   4 originator Link(Element) [0..*]
+  5 verifiedUsing IntegrityMethod [0..*]    // verifies referenced entity
 
 Snippet = Record
   1 location SnippetLocation
   2 snippetPurpose SoftwarePurpose [0..*]
-  3 artifactUri ArtifactUri [0..*]  // move verifiedUsing from Element
+  3 artifactUri ArtifactUri [0..*]
   4 originator Link(Element) [0..*]
+  5 verifiedUsing IntegrityMethod [0..*]    // verifies referenced entity
 
 Collection = Record
   1 elements IRI [0..*]
 
 Package = Record
-  1 elements IRI [0..*]
-  2 packagePurpose SoftwarePurpose [0..*]
+  1 elements IRI [0..*]     // Convenience alias for Collection. May have a single File (Artifact) or multiple entities
 
 BOM = Record
   1 elements IRI [0..*]
