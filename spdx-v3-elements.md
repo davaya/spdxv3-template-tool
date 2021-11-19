@@ -4,12 +4,15 @@
 * An Element is metadata about an entity.
 * In the logical model (information as processed by applications) every Element is independent.
 * An arbitrary set of Elements may be serialized as an ephemeral Bag for transfer between applications.
-* Context is content shared by two or more Elements that is factored out for efficient serialization. The more the arbitrary Elements have in common, the more efficient the serialization.
-* Context is **not** a part of any Element.
+* Context is not part of any logical Element.
+* Context is not part of any single serialized Element.
+* Context is information shared by two or more logical Elements that is factored out for efficient serialization.
+* The more a set of Elements have in common, the more efficient the serialization.
 
 ## Collection (Composition)
 * A Collection is an entity that is **composed** of other entities.
 * A Collection Element is metadata about the Collection entity.
+* A Collection Element can be serialized into a Collection entity (Artifact/Package/BOM).
 
 SPDX v2:
 
@@ -19,6 +22,11 @@ Typically, a Package is composed of one or more files."
 Physical example:
 * A ferry load is a Bag of cars and people that have no intrinsic relationship other than being together at a specific place and time.
 * A car is a Collection that is **composed** of subcomponents (engine, brakes, wheels, ...). The engine in turn is also a Collection of subcomponents.
+
+Software Package example:
+* A software package may be (but is not always) a single Artifact (tar/rpm/deb file).
+* An SPDX Package Element is metadata about the contents of a package
+* An SPDX Package Element may be serialized into an SBOM File Artifact.
 
 The term "Contextual Collection" is an obstacle to understanding because it conflates
 Context (which can exist between unrelated or related elements) and

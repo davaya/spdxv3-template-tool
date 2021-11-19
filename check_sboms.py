@@ -23,9 +23,12 @@ def make_iri(eid: str, cx: dict) -> str:
     print(eid, u)
 
 
-def split_collection(e: dict, outfile) -> None:
+def split_collection(e: dict, outdir: str) -> None:
     cx = e.pop('context')
     oe = {'id': make_iri(e['id'], cx), 'type': e['type']}
+
+
+def join_collection(e: dict, cx: dict, edir: str, outdir) -> None:
 
 
 def load_any(path: str) -> (dict, None):
