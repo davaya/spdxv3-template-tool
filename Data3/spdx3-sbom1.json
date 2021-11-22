@@ -24,10 +24,11 @@
       {"id": "p3", "type": {"package": {"elements": ["f5", "f2"]}}, "name": "Package3"},
       {"id": "p6", "type": {"package": {"elements": ["f6", "p7"]}}, "name": "Package6"},
       {"id": "p7", "type": {"package": {"elements": ["f7"]}}, "name": "Package7"},
-      {"id": "f2", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/abc.md"}}, "name": "file2"},
-      {"id": "f5", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/def.md"}}, "name": "file5"},
-      {"id": "f6", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/ghi.md"}}, "name": "file6"},
-      {"id": "f7", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/jkl.md"}}, "name": "file7"}
+      {"id": "f1", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/abc.md", "originator": ["i1"]}}, "name": "file1"},
+      {"id": "f2", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/def.md"}}, "name": "file2"},
+      {"id": "f5", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/ghi.md"}}, "name": "file5"},
+      {"id": "f6", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/jkl.md"}}, "name": "file6"},
+      {"id": "f7", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/mno.md"}}, "name": "file7"}
     ],
     "elementRefs": [
       {"id": "acme:p1", "verifiedUsing": {"hashes": {"md5": "6be192b1243a593ab0b690230c3ba842"}}},

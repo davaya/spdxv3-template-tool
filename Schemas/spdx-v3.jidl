@@ -22,7 +22,7 @@ Element = Map
  11 verifiedUsing IntegrityMethod [0..*]    // verifies Element properties, not entities (Identity and Artifact) referenced by Elements
  12 externalReference ExternalReference [0..*]
  13 extension Extension [0..*]  // Should be extension point "..."
- 99 context Context optional    // not in deserialized Element, but serialized as a property analogous to JSON Cleartext Signature
+ 99 context Context optional    // not in logical Element, but serialized as a pseudo-property analogous to JSON Cleartext Signature
 
 ElementRef = Record
   1 id Link(Element)
@@ -39,16 +39,15 @@ Context = Record{1..*}
   8 elementRefs ElementRef [0..*]
 
 ElementType = Choice
-  1 identity Identity
-  2 annotation Annotation
-  3 relationship Relationship
-  4 document Document
-  5 file File
-  6 snippet Snippet
-  7 collection Collection
-  8 package Package
-  9 bom BOM
- 10 sbom SBOM
+  1 annotation Annotation
+  2 relationship Relationship
+  3 identity Identity
+  4 file File
+  5 snippet Snippet
+  6 collection Collection
+  7 package Package
+  8 bom BOM
+  9 sbom SBOM
 
 Identity = Record
   1 type IdentityType
@@ -57,17 +56,14 @@ Identity = Record
 
 Annotation = Record
   1 type AnnotationType
-  2 statement String optional
+  2 subject Link(Element)
+  3 statement String optional
 
 Relationship = Record
   1 type RelationshipType
   2 from Link(Element)
   3 to Link(Element) [1..*]
   4 completeness RelationshipCompleteness optional
-
-Document = Record   // File containing a serialized Element including Context
-  1 artifactUri ArtifactUri
-  2 verifiedUsing IntegrityMethod [0..*]    // verifies referenced entity
 
 File = Record
   1 contentType MediaType optional
@@ -87,7 +83,7 @@ Collection = Record
   1 elements IRI [0..*]
 
 Package = Record
-  1 elements IRI [0..*]     // Convenience alias for Collection. May have a single File (Artifact) or multiple entities
+  1 elements IRI [0..*]
 
 BOM = Record
   1 elements IRI [0..*]
@@ -96,7 +92,7 @@ SBOM = Record
   1 elements IRI [0..*]
 
 Created = Record
-  1 by Link(Element) [1..*]     // must be an Identity element
+  1 by Link(Element) [1..*]     // must be an Identity Element
   2 when DateTime
 
 IdentityType = Choice
@@ -134,8 +130,6 @@ MediaType = String
 
 Prefix = String{1..8}
 
-ProfileIdentifier = String
-
 SemVer = String
 
 SnippetLocation = Record
@@ -151,6 +145,8 @@ ExternalReferenceType = Enumerated  // Unusable without defined values
 LicenseId = Enumerated  // From license list: referenceNumber, licenseId  // name
  451 Apache-2.0 // Apache License 2.0
  457 CC0-1.0 // Creative Commons Zero v1.0 Universal
+
+ProfileIdentifier = String  // Should be Enumerated, need list of identifiers
 
 RelationshipCompleteness = Enumerated
   1 KNOWN
