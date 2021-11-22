@@ -1,5 +1,5 @@
 package: "http://spdx.org/spdx/v3/document"
-exports: ["Element", "ContextElement"]
+exports: ["Element"]
 title: "SPDX v3"
 description: "Information Model: serialization derived from SPDXv3 logical model"
 license: "CC0-1.0"

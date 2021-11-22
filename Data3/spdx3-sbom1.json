@@ -16,7 +16,7 @@
     "dataLicense": "CC0-1.0",
     "baseIRI": "http://sbom.auditguys.com/2021/nqMR92jAmlH424hJ/",
     "prefixes": {
-      "acme": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8"
+      "acme": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/"
     },
     "elementValues": [
       {"id": "i1", "type": {"identity": {"type": {"person": {}}, "email": "steve@auditguys.com"}}, "name": "Steven Miller"},
