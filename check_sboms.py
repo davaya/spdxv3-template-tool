@@ -17,7 +17,7 @@ IRI_LOCATIONS = ('id', 'created/by', '*/elements/*', 'relationship/from', 'relat
 def expand_iri(context: dict, element_id: str) -> str:
     u = urlparse(element_id)
     if u.scheme:
-        if prefix := context.get('prefixes', {}).get('scheme', ''):
+        if prefix := context.get('prefixes', {}).get(u.scheme, ''):
             return prefix + u.path
         return element_id
     if element_id not in context['IDS']:
