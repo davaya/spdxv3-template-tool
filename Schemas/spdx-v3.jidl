@@ -4,9 +4,11 @@ title: "SPDX v3"
 description: "Information Model: serialization derived from SPDXv3 logical model"
 license: "CC0-1.0"
 
-ContextElement = Array      // Simple serialization of Context and Element
-  1 Context     // context::
-  2 Element     // element::
+Bundle = ArrayOf(Element){1..*} set // Serialization of any group of Elements without optimization
+
+ContextElement = Array              // Serialization of Element with context-enabled compression
+  1 Element                         // element::
+  2 Context                         // context::  includes any additional Elements in the same document
 
 Element = Map
   1 id Key(IRI)
@@ -15,28 +17,29 @@ Element = Map
   4 summary String optional
   5 description String optional
   6 comment String optional
-  7 specVersion SemVer optional  // required in logical model?
-  8 created Created optional    // required, default from context or explicit
-  9 profile ProfileIdentifier [0..*]     // [1..*] in logical model?
- 10 dataLicense LicenseId optional
- 11 verifiedUsing IntegrityMethod [0..*]    // verifies Element properties, not entities (Identity and Artifact) referenced by Elements
- 12 externalReference ExternalReference [0..*]
- 13 extension Extension [0..*]  // Should be extension point "..."
- 99 context Context optional    // not in logical Element, but serialized as a pseudo-property analogous to JSON Cleartext Signature
-
-ElementRef = Record
-  1 id Link(Element)
-  2 verifiedUsing IntegrityMethod    // Verifies properties of referenced Element
+  7 specVersion SemVer optional         // required, default from context or explicit
+  8 created Created optional            // required, default from context or explicit
+  9 profile ProfileIdentifier [0..*]    // required, default from context or explicit [1..*]
+ 10 dataLicense LicenseId optional      // required, default from context or explicit
+ 11 verifiedUsing IntegrityMethod optional    // Only valid for Artifact types - move to Artifact/verifiedUsing
+ 12 externalReference ExternalReference [0..*]  // How is this different from Artifact?
+ 13 extension Extension [0..*]          // Should be extension point "..."
+ 99 context Context optional            // not an Element property, an alternative serialization of ContextElement
 
 Context = Record{1..*}
-  1 specVersion SemVer optional         // default for Element properties propagated in serialization
+  1 specVersion SemVer optional         // default Element properties used when deserializing document
   2 created Created optional            // default
   3 profile ProfileIdentifier [0..*]    // default
   4 dataLicense LicenseId optional      // default
-  5 baseIRI IRI optional
-  6 prefixes MapOf(Prefix, IRI){1..*} optional
-  7 elementValues Element [0..*]
-  8 elementRefs ElementRef [0..*]
+  5 baseIRI IRI optional                // namespace of this document
+  6 prefixes MapOf(Prefix, IRI){1..*} optional  // namespaces of other documents
+  7 elementValues Element [0..*]    // additional elements, related or unrelated, serialized in this document
+  8 elementRefs ElementRef [0..*]   // other documents containing additional elements, related or unrelated
+
+ElementRef = Record                     // "ExternalMap" in logical model
+  1 id Link(Element)                    // referenced Element, "externalId" in logical model
+  2 verifiedUsing IntegrityMethod       // Verifies document containing the referenced Element
+  3 elementUrl ArtifactUri optional     // identifier of serialized document containing the referenced Element
 
 ElementType = Choice
   1 annotation Annotation
@@ -52,7 +55,7 @@ ElementType = Choice
 Identity = Record
   1 type IdentityType
   2 email String /email optional
-  3 verifiedUsing IntegrityMethod [0..*]    // Identity and Artifact entities are verified separately from Element properties
+  3 verifiedUsing IntegrityMethod optional    // Identity and Artifact entities are verified separately from Element properties
 
 Annotation = Record
   1 type AnnotationType
@@ -70,16 +73,16 @@ File = Record
   2 filePurpose SoftwarePurpose [0..*]
   3 artifactUri ArtifactUri optional
   4 originator Link(Element) [0..*]
-  5 verifiedUsing IntegrityMethod [0..*]    // verifies referenced entity
+  5 verifiedUsing IntegrityMethod optional    // verifies referenced entity
 
 Snippet = Record
   1 location SnippetLocation
   2 snippetPurpose SoftwarePurpose [0..*]
   3 artifactUri ArtifactUri [0..*]
   4 originator Link(Element) [0..*]
-  5 verifiedUsing IntegrityMethod [0..*]    // verifies referenced entity
+  5 verifiedUsing IntegrityMethod optional    // verifies referenced entity
 
-Collection = Record
+Collection = Record             // A group Element that has member Elements (defines parent-child relationships)
   1 elements IRI [0..*]
 
 Package = Record
@@ -120,10 +123,6 @@ PublicKeySignature = Record
 
 Extension = Record
 
-ExternalReference = Record
-  1 type ExternalReferenceType
-  2 locator URI
-
 DateTime = String  // implement Integer /datetime_ms
 
 MediaType = String
@@ -134,19 +133,21 @@ SemVer = String
 
 SnippetLocation = Record
 
-IRI = String   // Element id:  local, prefix:local, absolute-IRI
+IRI = String   // Element id:  local, prefix:local, or absolute-IRI
 
 ArtifactUri = String /uri
-
-URI = String /uri   // External Reference locator
-
-ExternalReferenceType = Enumerated  // Unusable without defined values
 
 LicenseId = Enumerated  // From license list: referenceNumber, licenseId  // name
  451 Apache-2.0 // Apache License 2.0
  457 CC0-1.0 // Creative Commons Zero v1.0 Universal
 
-ProfileIdentifier = String  // Should be Enumerated, need list of identifiers
+ExternalReference = Record      // How does this differ from Artifact?
+  1 type ExternalReferenceType
+  2 artifactUri ArtifactUri optional    // called "locator" in logical model
+
+ExternalReferenceType = Enumerated      // Invalid without at least one defined value
+
+ProfileIdentifier = String  // Should be Enumerated, need list.  Is this logical model "pkg"?
 
 RelationshipCompleteness = Enumerated
   1 KNOWN

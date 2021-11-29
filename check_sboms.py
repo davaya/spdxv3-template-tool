@@ -15,23 +15,32 @@ IRI_LOCATIONS = ('id', 'created/by', '*/elements/*', 'relationship/from', 'relat
 
 
 def expand_iri(context: dict, element_id: str) -> str:
-    u = urlparse(element_id)
-    if u.scheme:
-        if prefix := context.get('prefixes', {}).get(u.scheme, ''):
-            return prefix + u.path
-        return element_id
-    if element_id not in context['IDS']:
-        raise ValueError(f'Undefined Element {element_id}')
-    return context.get('baseIRI', '') + element_id
+    """
+    Convert an Element ID in namespace:local form to an IRI
+    """
+    if context:
+        u = urlparse(element_id)
+        if u.scheme:
+            if prefix := context.get('prefixes', {}).get(u.scheme, ''):
+                return prefix + u.path
+            return element_id
+        if element_id not in context.get('local_ids', []):
+            print(f'    Undefined Element: {element_id}')
+        return context.get('baseIRI', '') + element_id
+    return element_id
 
 
 def compress_iri(context: dict, iri: str) -> str:
-    if base := context.get('baseIRI', ''):
-        if iri.startswith(base):
-            return iri.replace(base, '')
-    for k, v in context.get('prefixes', {}).items():
-        if iri.startswith(v):
-            return iri.replace(v, k + ':')
+    """
+    Convert an Element IRI to namespace:local form
+    """
+    if context:
+        if base := context.get('baseIRI', ''):
+            if iri.startswith(base):
+                return iri.replace(base, '')
+        for k, v in context.get('prefixes', {}).items():
+            if iri.startswith(v):
+                return iri.replace(v, k + ':')
     return iri
 
 
@@ -57,7 +66,27 @@ def expand_ids(context: dict, element: dict, paths: list) -> None:
         etype['relationship']['to'] = [expand_iri(context, k) for k in etype['relationship']['to']]
 
 
+def compress_ids(context: dict, element: dict) -> None:
+    etype = element['type']
+    element.update({'id': compress_iri(context, element['id'])})
+    if 'created' in element:
+        element['created']['by'] = [compress_iri(context, k) for k in element['created']['by']]
+    for t in etype:
+        if 'elements' in etype[t]:
+            etype[t]['elements'] = [compress_iri(context, k) for k in etype[t]['elements']]
+        elif 'originator' in etype[t]:
+            etype[t]['originator'] = [compress_iri(context, k) for k in etype[t]['originator']]
+    if 'annotation' in etype:
+        etype['annotation']['subject'] = compress_iri(context, etype['annotation']['subject'])
+    if 'relationship' in etype:
+        etype['relationship']['from'] = compress_iri(context, etype['relationship']['from'])
+        etype['relationship']['to'] = [compress_iri(context, k) for k in etype['relationship']['to']]
+
+
 def expand_element(context: dict, element: dict) -> dict:
+    """
+    Fill in Element properties from Context
+    """
     element_x = {'id': ''}      # put id first
     element_x.update({k: context[k] for k in DEFAULT_PROPERTIES if k in context})
     element_x.update(element)
@@ -68,14 +97,20 @@ def expand_element(context: dict, element: dict) -> dict:
 
 
 def split_element_set(context: dict, element: dict) -> list:
+    """
+    Split an Element + Context into a set of individual Elements
+    """
     context.update({k: element[k] for k in DEFAULT_PROPERTIES if k in element})
     elist = [expand_element(context, element)]
-    for e in cx.get('elementValues', []):
-        elist.append(expand_element(cx, e))
+    for e in context.get('elementValues', []):
+        elist.append(expand_element(context, e))
     return elist
 
 
-def join_collection(e: dict, cx: dict, edir: str, outdir) -> None:
+def join_element_set(context: dict, element_id: str, elements: list) -> dict:
+    """
+    Combine a set of individual Elements into a designated Element, update Context
+    """
     return
 
 
@@ -118,8 +153,8 @@ if __name__ == '__main__':
         print(f)
         data = json.load(open(os.path.join(DATA_DIR, f)))
         el = sc.decode('Element', data)
-        cx = el.pop('context')
-        cx['IDS'] = [compress_iri(cx, el['id'])] + [compress_iri(cx, ev['id']) for ev in cx.get('elementValues', {})]
+        cx = el.pop('context', {})
+        cx['local_ids'] = [compress_iri(cx, el['id'])] + [compress_iri(cx, ev['id']) for ev in cx.get('elementValues', {})]
         elements = split_element_set(cx, el)
         fpath = os.path.join(OUT_DIR, f)
         make_dot(cx, elements, fpath)

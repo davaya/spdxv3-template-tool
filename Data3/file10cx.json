@@ -1,0 +1,25 @@
+{
+  "id": "file10",
+  "type": {
+    "file": {
+      "contentType": "text/html",
+      "filePurpose": ["DOCUMENTATION"],
+      "artifactUri": "https://www.acme.com/docs/file10.html",
+      "originator": ["i1"]
+    }
+  },
+  "name": "File 10",
+  "profile": ["Core", "Software"],
+  "verifiedUsing": {"hashes": {"sha256": "4a1c649c41a920c9a484b50302d97313fd5ffb81d8b30ffe93fae0ee62979fc0"}},
+
+  "context": {
+    "specVersion": "3.0",
+    "created": {
+      "by": ["i1"],
+      "when": "2021-11-11T14:39:23+00:00"
+    },
+    "profile": ["Core"],
+    "dataLicense": "CC0-1.0",
+    "baseIRI": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/"
+  }
+}

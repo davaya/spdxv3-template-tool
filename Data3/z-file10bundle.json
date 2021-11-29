@@ -1,0 +1,59 @@
+[
+  {
+    "id": "http://acme.com/sboms/long/path/file10",
+    "type": {
+      "file": {
+        "contentType": "text/html",
+        "filePurpose": ["DOCUMENTATION"],
+        "artifactUri": "https://www.acme.com/docs/file10.html",
+        "originator": ["http://sbom.auditguys.com/2021/nqMR92jAmlH424hJ/i1"]
+      }
+    },
+    "name": "File 10",
+    "specVersion": "3.0",
+    "created": {
+      "by": ["sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/i1"],
+      "when": "2021-11-09T14:39:23+00:00"
+    },
+    "profile": ["Core", "Software"],
+    "dataLicense": "CC0-1.0",
+    "verifiedUsing": {"hashes": {"sha256": "4a1c649c41a920c9a484b50302d97313fd5ffb81d8b30ffe93fae0ee62979fc0"}}
+  },
+
+  {
+    "id": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/i1",
+    "type": {
+      "identity": {
+        "type": {"person": {}},
+        "email": "gary@acme.com"
+      }
+    },
+    "name": "Gary Wright",
+    "specVersion": "3.0",
+    "created": {
+      "by": ["sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/i1"],
+      "when": "2021-11-09T14:39:23+00:00"
+    },
+    "profile": ["Core"],
+    "dataLicense": "Apache-2.0"
+  },
+
+  {
+    "id": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/i1",
+    "type": {
+      "identity": {
+        "type": {
+          "person": {}},
+        "email": "gary@acme.com"
+      }
+    },
+    "name": "Gary Wright",
+    "specVersion": "3.0",
+    "created": {
+      "by": ["sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/i1"],
+      "when": "2021-11-09T14:39:23+00:00"
+    },
+    "profile": ["Core"],
+    "dataLicense": "Apache-2.0"
+  }
+]

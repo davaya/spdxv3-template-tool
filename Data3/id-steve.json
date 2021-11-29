@@ -1,0 +1,17 @@
+{
+  "id": "http://sbom.auditguys.com/2021/nqMR92jAmlH424hJ/i1",
+  "type": {
+    "identity": {
+      "type": {"person": {}},
+      "email": "steve@auditguys.com"
+    }
+  },
+  "name": "Steven Miller",
+  "specVersion": "3.0",
+  "created": {
+    "by": ["http://sbom.auditguys.com/2021/nqMR92jAmlH424hJ/i1"],
+    "when": "2021-11-8T14:15:16+00:00"
+  },
+  "profile": ["Core"],
+  "dataLicense": "CC0-1.0"
+}
