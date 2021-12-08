@@ -85,7 +85,7 @@ def list_dir(dirname: str) -> dict:
         with urlopen(Request(dirname, headers=AUTH)) as d:
             for dl in json.loads(d.read().decode()):
                 url = 'url' if dl['type'] == 'dir' else 'download_url'
-                entry = WebDirEntry(dl['name'], dl['url'], dl[url])
+                entry = WebDirEntry(dl['name'], dl[url], dl['url'])
                 (dirs if dl['type'] == 'dir' else files).append(entry)
     else:
         with os.scandir(dirname) as dlist:
@@ -171,11 +171,11 @@ def load_template_from_list_dirs(rootdir: str) -> dict:
     """
 
     def _d(path: str) -> str:
-        print('***dir: ', path)
+        print(f'  dir: {path}')
         return path.removeprefix(rootdir)
 
     def _f(path: str) -> str:
-        print('***file: ', path)
+        print(f'  file: {path}')
         model = urlparse(path).path.removeprefix(urlparse(rootdir).path)
         return path.removeprefix(path.removesuffix(model))
 
@@ -212,7 +212,7 @@ if __name__ == '__main__':
     print(f'Scanning template files from "{TEMPLATE_ROOT}"')
     templates = load_template_from_list_dirs(TEMPLATE_ROOT)
 
-    print(f'\nConverting logical model to information model in directory "{OUTPUT_DIR}"')
+    print(f'\nConverting logical model to information model: {OUTPUT_DIR}/{OUTPUT_FILE}')
     for package, template in templates.items():
         if package != 'Core':
             continue            # Ignore other packages until template has real data
@@ -229,11 +229,11 @@ if __name__ == '__main__':
             fields = []
             sect = mt.get('Properties', {})
             if not sect:
-                print(f'Missing properties section - {mt["Metadata"]["name"]}')
+                print(f'  Missing properties section - {mt["Metadata"]["name"]}')
             for fn, fv in enumerate(sect.items(), start=1):
                 ftype = fv[1].get('type', '')
                 if not ftype:
-                    print(f'Missing type - {mt["Metadata"]["name"]}:{fv[0]}')
+                    print(f'  Missing type - {mt["Metadata"]["name"]}:{fv[0]}')
                 opts = multopts(fv[1]['minCount'], fv[1]['maxCount'])
                 fields.append([fn, fv[0], fieldtype(ftype), opts, ''])
                 props.append([fv[0], ftype, ''])
@@ -243,16 +243,16 @@ if __name__ == '__main__':
         for p in props:
             try:
                 if template['Properties'][p[0]]['meta']['Range'] != p[1]:
-                    print(f'{str(p):40} != {template["Properties"][p[0]]["meta"]}')
+                    print(f'  {str(p):40} != {template["Properties"][p[0]]["meta"]}')
             except KeyError:
-                print(f'No Property {p[0]}')
+                print(f'  No Property {p[0]}')
 
         # Convert "Vocabularies" sections to Enumerated type definitions
         for mt in template['Vocabularies'].values():
             items = []
             sect = mt.get('Entries', {})
             if not sect:
-                print(f'Missing entries section - {mt["Metadata"]["name"]}')
+                print(f'  Missing entries section - {mt["Metadata"]["name"]}')
             for fn, fv in enumerate(sect.items(), start=1):
                 items.append([fn, fv[0], fv[1]])
             schema['types'].append([mt['Metadata']['name'], 'Enumerated', [], '', items])

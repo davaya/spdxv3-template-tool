@@ -4,7 +4,7 @@ title: "SPDX v3"
 description: "Information Model: serialization derived from SPDXv3 logical model"
 license: "CC0-1.0"
 
-Bundle = ArrayOf(Element){1..*} set // Serialization of any group of Elements without optimization
+// Bundle = ArrayOf(Element){1..*} set // Serialization of any group of Elements without optimization
 
 ContextElement = Array              // Serialization of Element with context-enabled compression
   1 Element                         // element::
@@ -45,17 +45,13 @@ ElementType = Choice
   1 annotation Annotation
   2 relationship Relationship
   3 identity Identity
-  4 file File
-  5 snippet Snippet
-  6 collection Collection
-  7 package Package
-  8 bom BOM
-  9 sbom SBOM
-
-Identity = Record
-  1 type IdentityType
-  2 email String /email optional
-  3 verifiedUsing IntegrityMethod optional    // Identity and Artifact entities are verified separately from Element properties
+  4 contextualCollection ContextualCollection
+  5 bom BOM
+  6 document Document
+ 10 snippet Snippet     // pkg:Software
+ 11 file File           // pkg:Software
+ 12 package Package     // pkg:Software
+ 13 sbom SBOM           // pkg:Software
 
 Annotation = Record
   1 type AnnotationType
@@ -68,31 +64,47 @@ Relationship = Record
   3 to Link(Element) [1..*]
   4 completeness RelationshipCompleteness optional
 
+Identity = Record
+  1 type IdentityType
+  2 email String /email optional
+  3 verifiedUsing IntegrityMethod optional    // Identity and Artifact entities are verified separately from Element properties
+
+ContextualCollection = Record
+  1 elements Link(Element) [0..*]       // <-Collection
+  2 rootElements Link(Element) [0..*]   // <-Collection
+
+BOM = Record
+  1 elements Link(Element) [0..*]       // <-Collection
+  2 rootElements Link(Element) [0..*]   // <-Collection
+
+Document = Record
+  1 artifactUri ArtifactUri optional    // <-Artifact
+  2 originator Link(Element) [0..*]     // <-Artifact
+  3 verifiedUsing IntegrityMethod optional    // verifies referenced entity
+
 File = Record
   1 contentType MediaType optional
   2 filePurpose SoftwarePurpose [0..*]
-  3 artifactUri ArtifactUri optional
-  4 originator Link(Element) [0..*]
+  3 artifactUri ArtifactUri optional    // <-Artifact
+  4 originator Link(Element) [0..*]     // <-Artifact
   5 verifiedUsing IntegrityMethod optional    // verifies referenced entity
 
 Snippet = Record
   1 location SnippetLocation
   2 snippetPurpose SoftwarePurpose [0..*]
-  3 artifactUri ArtifactUri [0..*]
-  4 originator Link(Element) [0..*]
+  3 artifactUri ArtifactUri [0..*]      // <-Artifact
+  4 originator Link(Element) [0..*]     // <-Artifact
   5 verifiedUsing IntegrityMethod optional    // verifies referenced entity
 
-Collection = Record             // A group Element that has member Elements (defines parent-child relationships)
-  1 elements IRI [0..*]
-
 Package = Record
-  1 elements IRI [0..*]
-
-BOM = Record
-  1 elements IRI [0..*]
+  1 packagePurpose SoftwarePurpose [0..*]
+  2 artifactUri ArtifactUri [0..*]      // <-Artifact
+  3 originator Link(Element) [0..*]     // <-Artifact
+  4 verifiedUsing IntegrityMethod optional    // verifies referenced entity
 
 SBOM = Record
-  1 elements IRI [0..*]
+  1 elements Link(Element) [0..*]       // <-Collection
+  2 rootElements Link(Element) [0..*]   // <-Collection
 
 Created = Record
   1 by Link(Element) [1..*]     // must be an Identity Element
@@ -141,13 +153,17 @@ LicenseId = Enumerated  // From license list: referenceNumber, licenseId  // nam
  451 Apache-2.0 // Apache License 2.0
  457 CC0-1.0 // Creative Commons Zero v1.0 Universal
 
-ExternalReference = Record      // How does this differ from Artifact?
+ExternalReference = Record
   1 type ExternalReferenceType
   2 artifactUri ArtifactUri optional    // called "locator" in logical model
 
 ExternalReferenceType = Enumerated      // Invalid without at least one defined value
+  1 FOO             // TBSL
 
-ProfileIdentifier = String  // Should be Enumerated, need list.  Is this logical model "pkg"?
+ProfileIdentifier = Enumerated      // Shown as "pkg" on logical model diagram, use upper case?
+  1 Core
+  2 Software
+  3 License         // TBSL
 
 RelationshipCompleteness = Enumerated
   1 KNOWN

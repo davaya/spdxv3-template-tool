@@ -1,9 +1,7 @@
 {
   "id": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/p1",
   "type": {
-    "package": {
-      "elements": ["p2", "f2"]
-    }
+    "package": {}
   },
   "name": "Package2",
   "specVersion": "3.0",
@@ -11,13 +9,13 @@
     "by": ["i1"],
     "when": "2021-11-09T14:39:23+00:00"
   },
-  "profile": ["Some Profile Name", "Another Profile"],
+  "profile": ["Core", "Software"],
   "dataLicense": "Apache-2.0",
   "context": {
     "baseIRI": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/",
     "elementValues": [
-      {"id": "p2", "type": {"package": {"elements": ["p3", "f2", "f3"]}}, "name": "Package4"},
-      {"id": "p3", "type": {"package": {"elements": ["f1"]}}, "name": "Package5"},
+      {"id": "p2", "type": {"package": {"artifactUri": ["https://www.acme.com/foo/package4.deb"]}}, "name": "Package4"},
+      {"id": "p3", "type": {"package": {}}, "name": "Package5"},
       {"id": "f1", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/abc.md", "originator": ["i1"]}}, "name": "file1", "dataLicense": "CC0-1.0"},
       {"id": "f2", "type": {"file": {"contentType": "application/vnd.microsoft.portable-executable", "filePurpose": ["APPLICATION"], "artifactUri": "http://somewhere.com/downloads/def.exe", "originator": ["i1"]}}},
       {"id": "f3", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/ghi.md", "originator": ["i1"]}}, "name": "file5"},

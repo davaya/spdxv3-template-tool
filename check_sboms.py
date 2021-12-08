@@ -149,12 +149,13 @@ if __name__ == '__main__':
     os.makedirs(OUT_DIR, exist_ok=True)
     s = load_any(SCHEMA)
     sc = jadn.codec.Codec(s, verbose_rec=True, verbose_str=True)
-    for f in os.listdir(DATA_DIR):
-        print(f)
-        data = json.load(open(os.path.join(DATA_DIR, f)))
+    for f in os.scandir(DATA_DIR):
+        print(f.name)
+        if not f.is_file():
+            continue
+        data = json.load(open(f.path))
         el = sc.decode('Element', data)
         cx = el.pop('context', {})
         cx['local_ids'] = [compress_iri(cx, el['id'])] + [compress_iri(cx, ev['id']) for ev in cx.get('elementValues', {})]
         elements = split_element_set(cx, el)
-        fpath = os.path.join(OUT_DIR, f)
-        make_dot(cx, elements, fpath)
+        make_dot(cx, elements, os.path.join(OUT_DIR, f.name))
