@@ -1,6 +1,6 @@
 # spdxv3-template-tool
 The SPDX technical working group is defining version 3 starting with a logical diagram
-and working toward a logical model specified in a set of template files.
+and working toward a logical model specified in a set of [template files](https://github.com/spdx/spdx-3-model).
 Templates can also include an information model that defines the content of SPDX documents.
 This tool validates template files and translates them into an information model.
 The goal is for templates to become the single source of truth for both the logical diagram
