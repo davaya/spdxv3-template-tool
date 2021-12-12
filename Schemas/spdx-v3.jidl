@@ -24,7 +24,7 @@ Element = Map
  11 verifiedUsing IntegrityMethod optional    // Only valid for Artifact types - move to Artifact/verifiedUsing
  12 externalReference ExternalReference [0..*]  // How is this different from Artifact?
  13 extension Extension [0..*]          // Should be extension point "..."
- 99 context Context optional            // not an Element property, an alternative serialization of ContextElement
+ 99 context DocumentContext optional    // not an Element property, an alternative serialization of ContextElement
 
 DocumentContext = Record{1..*}
   1 specVersion SemVer optional         // default Element properties used when deserializing document
