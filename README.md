@@ -1,28 +1,30 @@
 # spdxv3-template-tool
-The SPDX technical committee is defining version 3
-starting with an ontology / knowledge model / class diagram. This
-tool translates ontology templates to information model
-packages that define the serialized structure of SPDX v3 documents.
-
-It also translates SPDX v2.2 SBOMs into v3 format.
+The SPDX technical working group is defining version 3 starting with a logical diagram
+and working toward a logical model specified in a set of template files.
+Templates can also include an information model that defines the content of SPDX documents.
+This tool validates template files and translates them into an information model.
+The goal is for templates to become the single source of truth for both the logical diagram
+and the information model, ensuring that they remain consistent.
 
 Contents:
 
 * Schemas
-    * spdx-v2_2 - SPDX v2.2 information model, validates v2.2 example SBOMs
-    * spdx3-sections - SPDX v3 information model, structured as sections analogous to v2.2
-    * spdx3-map - SPDX v3 information model, structured as a flat list of individually-typed elements
+    * spdx-v2_2: v2.2 information model, validates v2.2 example SBOMs
+    * spdx-v3: v3 information model, validates v3 example SBOMs
+      and is the desired output of the template translator.
 
-* Templates - original ontology template file in markdown format, and cleaned-up version. The tool will
-also accept individual template files in a simplified format stored on GitHub when they are available.
+* Data2, Data3
+    * Example SBOMs used to test the v2 and v3 information models
 
-* Data
-    * Example SPDX v2 SBOM, to test 2to3 translation
+* **template2model.py** - script to translate template files to the information model.
+  The script can read directly from GitHub or from a clone on the local filesystem.
 
-* template2model.py - script to translate ontology templates to information models
+* **check-elements.py** - script to validate serialized SPDXv3 Elements and demonstrate
+  that Element values are independent of data format and are independent of any other
+  Elements serialized in the same document.
 
-* make-artifacts.py - script to translate information models into various documentation formats
+* **make-artifacts.py** - script to translate information models into various documentation formats
   (native JSON, IDL, Markdown tables, HTML tables) and generate concrete schemas to validate SBOM documents
   in multiple data formats.
 
-* spdx-2to3.py - script to convert v2.2 SPDX documents to v3 format.
+* **spdx-2to3.py** - script to convert v2.2 SPDX documents to v3 format.

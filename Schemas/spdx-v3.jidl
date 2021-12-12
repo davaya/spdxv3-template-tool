@@ -6,9 +6,9 @@ license: "CC0-1.0"
 
 // Bundle = ArrayOf(Element){1..*} set // Serialization of any group of Elements without optimization
 
-ContextElement = Array              // Serialization of Element with context-enabled compression
-  1 Element                         // element::
-  2 Context                         // context::  includes any additional Elements in the same document
+ContextElement = Array          // Serialization of Element into a document with context
+  1 Element                     // element::
+  2 DocumentContext optional    // context::  includes additional Elements in the same document
 
 Element = Map
   1 id Key(IRI)
@@ -26,15 +26,15 @@ Element = Map
  13 extension Extension [0..*]          // Should be extension point "..."
  99 context Context optional            // not an Element property, an alternative serialization of ContextElement
 
-Context = Record{1..*}
+DocumentContext = Record{1..*}
   1 specVersion SemVer optional         // default Element properties used when deserializing document
   2 created Created optional            // default
   3 profile ProfileIdentifier [0..*]    // default
   4 dataLicense LicenseId optional      // default
   5 baseIRI IRI optional                // namespace of this document
   6 prefixes MapOf(Prefix, IRI){1..*} optional  // namespaces of other documents
-  7 elementValues Element [0..*]    // additional elements, related or unrelated, serialized in this document
-  8 elementRefs ElementRef [0..*]   // other documents containing additional elements, related or unrelated
+  7 elementValues Element [0..*]        // additional elements, related or unrelated, serialized in this document
+  8 elementRefs ElementRef [0..*]       // other documents containing additional elements, related or unrelated
 
 ElementRef = Record                     // "ExternalMap" in logical model
   1 id Link(Element)                    // referenced Element, "externalId" in logical model
@@ -198,9 +198,9 @@ RelationshipType = Enumerated
   3 CONTAINS
   4 CONTAINED_BY
   5 DEPENDS_ON
-  6 DEPENENCY_OF
+  6 DEPENDENCY_OF
   7 DEPENDENCY_MANIFEST_OF
-  8 BUILD_+DEPENDENCY_OF
+  8 BUILD_DEPENDENCY_OF
   9 DEV_DEPENDENCY_OF
  10 OPTIONAL_DEPENDENCY_OF
  11 PROVIDED_DEPENDENCY_OF

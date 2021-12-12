@@ -11,7 +11,7 @@ from typing import NoReturn
 
 SPDX_V2_SCHEMA = 'spdx-v2_2.jidl'
 SPDX_V3_SCHEMA = 'spdx-v3.jidl'
-DATA_DIR = 'Data'
+DATA_DIR = 'Data2'
 SCHEMA_DIR = 'Schemas'
 OUTPUT_DIR = 'Out'
 
