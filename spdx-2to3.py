@@ -47,35 +47,35 @@ def load_schema(filename: str) -> dict:
 
 
 def translate_2to3(v2doc: dict, verbose_id=False) -> list:
-    document = {
-        'element': {
-            'id': v2doc['SPDXID'],
-            'createdWhen': datems2int(v2doc['creationInfo']['created']),
-            'createdBy': v2doc['creationInfo']['creators'],
-            # 'verifiedUsing': no spdx2 equivalent
-            'externalReferences': v2doc['externalDocumentRefs'],
-            'name': v2doc.get('name', None),
-            'summary': v2doc.get('summary', None),
-            'description': v2doc.get('description', None),
-            'comment': v2doc.get('comment', None),
-            # creationInfo comment: no spdx3 equivalent
-            # 'extension': no spdx2 equivalent
+    element = {
+        'id': v2doc['SPDXID'],      # Get actual ID of SBOM Element.  (not SPDXRef-DOCUMENT)
+        'type': {
+            'sbom': {}
         },
-        'namespace': v2doc['documentNamespace'],
-        'specVersion': v2doc['spdxVersion'],
-        'profiles': 'Core',      # Profile Identifiers?
-        'dataLicense': v2doc['dataLicense']
+        'name': v2doc.get('name', ''),      # Do not populate if empty
+        'summary': v2doc.get('summary', ''),
+        'description': v2doc.get('description', ''),
+        'comment': v2doc.get('comment', ''),
+        # verifiedUsing
+        'externalReferences': v2doc['externalDocumentRefs']
+        # 'extension': no spdx2 equivalent
+        # creationInfo comment: no spdx3 equivalent
     }
-    v3sbom = [{'document': document}]
-    artifacts, identities, relationships, annotations = [], [], [], []
-    v3sbom += artifacts
-    v3sbom += identities
-    v3sbom += relationships
-    v3sbom += annotations
-    if not verbose_id:
-        for n, e in v3sbom:
-            e['element']['id'] = n
-    return v3sbom
+    document_context = {
+        'specVersion': v2doc['spdxVersion'],
+        'created': {
+            'by': v2doc['creationInfo']['creators'],
+            'when': datems2int(v2doc['creationInfo']['created']),   # Serialize epoch or string?
+        },
+        'profiles': 'Core',
+        'dataLicense': v2doc['dataLicense'],
+        'namespace': v2doc['documentNamespace']
+    }
+    artifacts, identities, relationships, annotations = [], [], [], []      # Add elementValues and elementRefs to document_context
+
+    element.update({'context': document_context})       # Use pseudo-property serialization
+    # return [element, document_context]                # use ContextElement serialization
+    return element
 
 
 if __name__ == '__main__':
@@ -87,7 +87,7 @@ if __name__ == '__main__':
         if os.path.splitext(fn)[1] == '.json':
             d2 = json.load(open(os.path.join(DATA_DIR, fn), 'r'))
             doc2 = codec2.decode('Document', d2)
-            doc3 = translate_2to3(doc2, verbose_id=True)
-            d3 = codec3.encode('SpdxDocument', doc3)
+            doc3 = translate_2to3(doc2)
+            d3 = codec3.encode('Element', doc3)
             with open(os.path.join(OUTPUT_DIR, fn), 'w') as fo:
                 json.dump(d3, fo)
