@@ -12,7 +12,7 @@ Generate JADN information model and JSON serialization from SPDXv3 template file
 """
 
 TEMPLATE_ROOT_DIR = os.path.join('..', 'spec-v3-template', 'model')
-TEMPLATE_ROOT_REPO = 'https://api.github.com/repos/spdx/spec-v3-template/contents/model'
+TEMPLATE_ROOT_REPO = 'https://api.github.com/repos/spdx/spdx-3-model/contents/model'
 TEMPLATE_ROOT = TEMPLATE_ROOT_REPO           # Select source of template files
 
 OUTPUT_DIR = 'Out'
@@ -146,6 +146,8 @@ def scan_template_file(fpath: str, file: str, category: str, fname: str) -> dict
                         tval[section][li1].update({k.strip(): v.strip()})
                     else:
                         print(f'  {fpath} line {ln} {section}/{li1} -- bad data: "{li2}"')
+            elif line.startswith('SPDX-License-Identifier:'):
+                pass
             elif section not in ('Description', 'Summary'):
                 print(f'  {fpath} line {ln} -- Unrecognized data: "{line}"')
     missing = { CATEGORY_METADATA: set(('Metadata',)),
