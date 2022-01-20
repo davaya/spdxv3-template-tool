@@ -119,12 +119,12 @@ def scan_template_file(fpath: str, file: str, category: str, fname: str) -> dict
         if len(line):
             if m := re.match(r'^#\s+(.+)\s*$', line):
                 if fname != m.group(1):
-                    print(f'  {fpath} line {ln} -- File name does not match heading {m.group(1)}')
+                    print(f'    {fpath} line {ln} -- File name does not match heading {m.group(1)}')
             elif m := re.match(r'^##\s+(.+)\s*$', line):
                 section = m.group(1)
                 li1, li2 = '', ''
                 if section not in ('Summary', 'Description', 'Metadata', 'Properties', 'Entries'):
-                    print(f'  {fpath} line {ln} -- Unknown section: "{section}"')
+                    print(f'    {fpath} line {ln} -- Unknown section: "{section}"')
                 if section == 'Metadata':
                     tval[section] = {'name': fname}
                     # default property values from top-level "Defaults.md"
@@ -145,17 +145,17 @@ def scan_template_file(fpath: str, file: str, category: str, fname: str) -> dict
                         k, v = li2.split(':', maxsplit=1)
                         tval[section][li1].update({k.strip(): v.strip()})
                     else:
-                        print(f'  {fpath} line {ln} {section}/{li1} -- bad data: "{li2}"')
+                        print(f'    {fpath} line {ln} {section}/{li1} -- bad data: "{li2}"')
             elif line.startswith('SPDX-License-Identifier:'):
                 pass
             elif section not in ('Description', 'Summary'):
-                print(f'  {fpath} line {ln} -- Unrecognized data: "{line}"')
+                print(f'    {fpath} line {ln} -- Unrecognized data: "{line}"')
     missing = { CATEGORY_METADATA: set(('Metadata',)),
                 'Classes': set(('Metadata', 'Properties')),
                 'Properties': set(('Metadata',)),
                 'Vocabularies': set(('Metadata', 'Entries'))}[category] - set(tval)
     if missing:
-        print(f'  {fpath} -- Missing required section: {missing}')
+        print(f'    {fpath} -- Missing required section: {missing}')
     return dict(tval)
 
 
@@ -184,7 +184,7 @@ def load_template_from_list_dirs(rootdir: str) -> dict:
     templ = dd()
     t1 = list_dir(rootdir)
     for f1 in t1['files']:
-        print(f'  {_f(f1.path)} -- file at root level ignored')
+        print(f'    {_f(f1.path)} -- file at root level ignored')
     for d1 in t1['dirs']:
         t2 = list_dir(d1.path)
         for f2 in t2['files']:
@@ -199,7 +199,7 @@ def load_template_from_list_dirs(rootdir: str) -> dict:
                 raise ValueError(f'{_d(d3.path)} -- unexpected directory at leaf level')
             for f3 in t3['files']:
                 if f3.name.startswith('_'):
-                    print(f'  {_f(f3.path)} -- _filename ignored')
+                    print(f'    {_f(f3.path)} -- _filename ignored')
                 else:
                     doc = read_file(f3.path)
                     fname = os.path.splitext(f3.name)[0]

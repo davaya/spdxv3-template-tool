@@ -26,13 +26,13 @@ Element = Map
  13 extension Extension [0..*]          // Should be extension point "..."
  99 context DocumentContext optional    // not an Element property, an alternative serialization of ContextElement
 
-DocumentContext = Record{1..*}
-  1 specVersion SemVer optional         // default Element properties used when deserializing document
-  2 created Created optional            // default
-  3 profile ProfileIdentifier [0..*]    // default
-  4 dataLicense LicenseId optional      // default
-  5 baseIRI IRI optional                // namespace of this document
-  6 prefixes MapOf(Prefix, IRI){1..*} optional  // namespaces of other documents
+DocumentContext = Record
+  1 namespace IRI                       // Document id and default namespace
+  2 prefixes MapOf(Prefix, IRI){1..*} optional  // namespaces of other documents
+  3 specVersion SemVer optional         // default Element properties used when deserializing document
+  4 created Created optional            // default
+  5 profile ProfileIdentifier [0..*]    // default
+  6 dataLicense LicenseId optional      // default
   7 elementValues Element [0..*]        // additional elements, related or unrelated, serialized in this document
   8 elementRefs ElementRef [0..*]       // other documents containing additional elements, related or unrelated
 
@@ -45,9 +45,9 @@ ElementType = Choice
   1 annotation Annotation
   2 relationship Relationship
   3 identity Identity
-  4 contextualCollection ContextualCollection
-  5 bom BOM
-  6 document Document
+  4 document Document
+  5 contextualCollection ContextualCollection   // not needed
+  6 bom BOM                                     // not needed, or extends Document
  10 snippet Snippet     // pkg:Software
  11 file File           // pkg:Software
  12 package Package     // pkg:Software
@@ -69,18 +69,19 @@ Identity = Record
   2 email String /email optional
   3 verifiedUsing IntegrityMethod optional    // Identity and Artifact entities are verified separately from Element properties
 
-ContextualCollection = Record
-  1 elements Link(Element) [0..*]       // <-Collection
-  2 rootElements Link(Element) [0..*]   // <-Collection
-
-BOM = Record
-  1 elements Link(Element) [0..*]       // <-Collection
-  2 rootElements Link(Element) [0..*]   // <-Collection
-
 Document = Record
-  1 artifactUri ArtifactUri optional    // <-Artifact
-  2 originator Link(Element) [0..*]     // <-Artifact
-  3 verifiedUsing IntegrityMethod optional    // verifies referenced entity
+  1 elements Link(Element) [1..*]       // Serialized document contains these elementValues
+  2 artifactUri ArtifactUri optional    // <-Artifact
+  3 originator Link(Element) [0..*]     // <-Artifact
+  4 verifiedUsing IntegrityMethod optional    // <-Artifact(proposed), verifies referenced entity
+
+ContextualCollection = Record           // (not needed)
+  1 elements Link(Element) [0..*]       // <-Collection
+  2 rootElements Link(Element) [0..*]   // <-Collection
+
+BOM = Record                            // (not needed)
+  1 elements Link(Element) [0..*]       // <-Collection
+  2 rootElements Link(Element) [0..*]   // <-Collection
 
 File = Record
   1 contentType MediaType optional
@@ -139,7 +140,7 @@ DateTime = String  // implement Integer /datetime_ms
 
 MediaType = String
 
-Prefix = String{1..8}
+Prefix = String{0..8}       // One Prefix may be the empty string
 
 SemVer = String
 

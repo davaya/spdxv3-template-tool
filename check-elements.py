@@ -1,5 +1,5 @@
 """
-Validate serialized SPDXv3 files against schema
+Expand documents containing element+context into multiple individual elements
 """
 import jadn
 import json
@@ -26,7 +26,7 @@ def expand_iri(context: dict, element_id: str) -> str:
             return element_id
         if element_id not in context.get('local_ids', []):
             print(f'    Undefined Element: {element_id}')
-        return context.get('baseIRI', '') + element_id
+        return context.get('namespace', '') + element_id
     return element_id
 
 
@@ -35,7 +35,7 @@ def compress_iri(context: dict, iri: str) -> str:
     Convert an Element IRI to namespace:local form
     """
     if context:
-        if base := context.get('baseIRI', ''):
+        if base := context.get('namespace', ''):
             if iri.startswith(base):
                 return iri.replace(base, '')
         for k, v in context.get('prefixes', {}).items():

@@ -20,7 +20,7 @@
     },
     "profile": ["Core"],
     "dataLicense": "CC0-1.0",
-    "baseIRI": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/",
+    "namespace": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/",
     "prefixes": {
       "aud": "http://sbom.auditguys.com/2021/nqMR92jAmlH424hJ/"
     },

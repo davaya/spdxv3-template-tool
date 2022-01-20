@@ -14,7 +14,7 @@
     },
     "profile": ["Core"],
     "dataLicense": "CC0-1.0",
-    "baseIRI": "http://sbom.auditguys.com/2021/nqMR92jAmlH424hJ/",
+    "namespace": "http://sbom.auditguys.com/2021/nqMR92jAmlH424hJ/",
     "prefixes": {
       "acme": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/"
     },

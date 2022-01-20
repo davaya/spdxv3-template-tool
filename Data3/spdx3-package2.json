@@ -12,7 +12,7 @@
   "profile": ["Core", "Software"],
   "dataLicense": "Apache-2.0",
   "context": {
-    "baseIRI": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/",
+    "namespace": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/",
     "elementValues": [
       {"id": "p2", "type": {"package": {"artifactUri": ["https://www.acme.com/foo/package4.deb"]}}, "name": "Package4"},
       {"id": "p3", "type": {"package": {}}, "name": "Package5"},
