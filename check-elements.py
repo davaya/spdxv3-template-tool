@@ -90,28 +90,14 @@ def expand_element(context: dict, element: dict) -> dict:
     element_x = {'id': ''}      # put id first
     element_x.update({k: context[k] for k in DEFAULT_PROPERTIES if k in context})
     element_x.update(element)
-    # print(f"  {element_x}")
     expand_ids(context, element_x, IRI_LOCATIONS)
-    print(f"  {element_x}")
     return element_x
 
 
-def split_element_set(context: dict, element: dict) -> list:
-    """
-    Split an Element + Context into a set of individual Elements
-    """
-    context.update({k: element[k] for k in DEFAULT_PROPERTIES if k in element})
-    elist = [expand_element(context, element)]
-    for e in context.get('elementValues', []):
-        elist.append(expand_element(context, e))
-    return elist
-
-
-def join_element_set(context: dict, element_id: str, elements: list) -> dict:
-    """
-    Combine a set of individual Elements into a designated Element, update Context
-    """
-    return
+def compress_element(context: dict, element_x: dict) -> dict:
+    element = {k: v for k, v in element_x.items() if v != context.get(k, '')}
+    compress_ids(context, element)
+    return element
 
 
 def load_any(path: str) -> (dict, None):
@@ -127,6 +113,12 @@ def load_any(path: str) -> (dict, None):
             raise ValueError(f'Unsupported schema format: {path}')
         return
     return loader(path)
+
+
+def dump_elements(document: dict, elements: list[dict]) -> None:
+    print({k: v for k, v in document.items() if k != 'elements'})
+    for e in elements:
+        print(compress_element(document, e))
 
 
 def make_dot(context: dict, elist: list, fp: str) -> None:
@@ -153,9 +145,8 @@ if __name__ == '__main__':
         print(f.name)
         if not f.is_file():
             continue
-        data = json.load(open(f.path))
-        el = sc.decode('Element', data)
-        cx = el.pop('context', {})
-        cx['local_ids'] = [compress_iri(cx, el['id'])] + [compress_iri(cx, ev['id']) for ev in cx.get('elementValues', {})]
-        elements = split_element_set(cx, el)
-        make_dot(cx, elements, os.path.join(OUT_DIR, f.name))
+        doc = sc.decode('UnitOfTransfer', json.load(open(f.path)))
+        doc['local_ids'] = [compress_iri(doc, e['id']) for e in doc['elements']]
+        x_elements = [expand_element(doc, e) for e in doc['elements']]
+        dump_elements(doc, x_elements)
+        make_dot(doc, x_elements, os.path.join(OUT_DIR, f.name))

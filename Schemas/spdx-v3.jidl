@@ -1,14 +1,17 @@
 package: "http://spdx.org/spdx/v3/document"
-exports: ["Element"]
+exports: ["UnitOfTransfer"]
 title: "SPDX v3"
 description: "Information Model: serialization derived from SPDXv3 logical model"
 license: "CC0-1.0"
 
-// Bundle = ArrayOf(Element){1..*} set // Serialization of any group of Elements without optimization
-
-ContextElement = Array          // Serialization of Element into a document with context
-  1 Element                     // element::
-  2 DocumentContext optional    // context::  includes additional Elements in the same document
+UnitOfTransfer = Record     // Serialized data object ("document"), not a Document Element describing the document
+  1 namespace Key(IRI)                  // document id = namespace = unique id of this document
+  2 elements Element [1..*]             // Elements, related or unrelated, serialized in this document
+  3 documentRefs ExternalMap [0..*]     // Info about referenced documents containing serialized elements
+  4 specVersion SemVer optional         // default property values for deserializing document
+  5 created Created optional            // default property values for deserializing document
+  6 profiles ProfileIdentifier [0..*]   // default property values for deserializing document
+  7 dataLicense LicenseId optional      // default property values for deserializing document
 
 Element = Map
   1 id Key(IRI)
@@ -17,37 +20,28 @@ Element = Map
   4 summary String optional
   5 description String optional
   6 comment String optional
-  7 specVersion SemVer optional         // required, default from context or explicit
-  8 created Created optional            // required, default from context or explicit
-  9 profile ProfileIdentifier [0..*]    // required, default from context or explicit [1..*]
- 10 dataLicense LicenseId optional      // required, default from context or explicit
+  7 specVersion SemVer optional         // required, explicit or default from document
+  8 created Created optional            // required, explicit or default from document
+  9 profiles ProfileIdentifier [0..*]   // required, explicit or default from document
+ 10 dataLicense LicenseId optional      // required, explicit or default from document
  11 verifiedUsing IntegrityMethod optional    // Only valid for Artifact types - move to Artifact/verifiedUsing
- 12 externalReference ExternalReference [0..*]  // How is this different from Artifact?
- 13 extension Extension [0..*]          // Should be extension point "..."
- 99 context DocumentContext optional    // not an Element property, an alternative serialization of ContextElement
+ 12 externalReferences ExternalReference [0..*]
+ 13 extensions Extension [0..*]         // Or use extension point "..."
 
-DocumentContext = Record
-  1 namespace IRI                       // Document id and default namespace
-  2 prefixes MapOf(Prefix, IRI){1..*} optional  // namespaces of other documents
-  3 specVersion SemVer optional         // default Element properties used when deserializing document
-  4 created Created optional            // default
-  5 profile ProfileIdentifier [0..*]    // default
-  6 dataLicense LicenseId optional      // default
-  7 elementValues Element [0..*]        // additional elements, related or unrelated, serialized in this document
-  8 elementRefs ElementRef [0..*]       // other documents containing additional elements, related or unrelated
-
-ElementRef = Record                     // "ExternalMap" in logical model
-  1 id Link(Element)                    // referenced Element, "externalId" in logical model
-  2 verifiedUsing IntegrityMethod       // Verifies document containing the referenced Element
-  3 elementUrl ArtifactUri optional     // identifier of serialized document containing the referenced Element
+ExternalMap = Record                // Information about referenced documents (units of transfer)
+  1 namespace Key(IRI)                  // Namespace of referenced document
+  2 prefix Prefix optional              // Abbreviation for namespace of referenced document
+  2 elements Link(Element) [1..*]       // Elements serialized in referenced document
+  3 artifactUri ArtifactUri optional    // URI of serialized document
+  4 verifiedUsing IntegrityMethod       // Verifies document containing the referenced Element
 
 ElementType = Choice
   1 annotation Annotation
   2 relationship Relationship
   3 identity Identity
   4 document Document
-  5 contextualCollection ContextualCollection   // not needed
-  6 bom BOM                                     // not needed, or extends Document
+  5 contextualCollection ContextualCollection   // Synonym for Collection
+  6 bom BOM
  10 snippet Snippet     // pkg:Software
  11 file File           // pkg:Software
  12 package Package     // pkg:Software
@@ -76,11 +70,11 @@ Document = Record
   4 verifiedUsing IntegrityMethod optional    // <-Artifact(proposed), verifies referenced entity
 
 ContextualCollection = Record           // (not needed)
-  1 elements Link(Element) [0..*]       // <-Collection
+  1 elements Link(Element) [1..*]       // <-Collection
   2 rootElements Link(Element) [0..*]   // <-Collection
 
 BOM = Record                            // (not needed)
-  1 elements Link(Element) [0..*]       // <-Collection
+  1 elements Link(Element) [1..*]       // <-Collection
   2 rootElements Link(Element) [0..*]   // <-Collection
 
 File = Record
@@ -104,7 +98,7 @@ Package = Record
   4 verifiedUsing IntegrityMethod optional    // verifies referenced entity
 
 SBOM = Record
-  1 elements Link(Element) [0..*]       // <-Collection
+  1 elements Link(Element) [1..*]       // <-Collection
   2 rootElements Link(Element) [0..*]   // <-Collection
 
 Created = Record
@@ -140,7 +134,7 @@ DateTime = String  // implement Integer /datetime_ms
 
 MediaType = String
 
-Prefix = String{0..8}       // One Prefix may be the empty string
+Prefix = String{1..8}   // Abbreviation for document namespace
 
 SemVer = String
 
@@ -161,7 +155,7 @@ ExternalReference = Record
 ExternalReferenceType = Enumerated      // Invalid without at least one defined value
   1 FOO             // TBSL
 
-ProfileIdentifier = Enumerated      // Shown as "pkg" on logical model diagram, use upper case?
+ProfileIdentifier = Enumerated      // Shown as "pkg" on logical model diagram, use upper case names?
   1 Core
   2 Software
   3 License         // TBSL

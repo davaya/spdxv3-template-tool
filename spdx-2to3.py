@@ -7,7 +7,6 @@ import json
 import os
 import re
 from datetime import datetime, timezone
-from typing import NoReturn
 
 SPDX_V2_SCHEMA = 'spdx-v2_2.jidl'
 SPDX_V3_SCHEMA = 'spdx-v3.jidl'
@@ -29,7 +28,7 @@ def datems2int(dts: str) -> int:
 
 
 def load_schema(filename: str) -> dict:
-    fn, ext = os.path.splitext(filename)
+    fname, ext = os.path.splitext(filename)
     try:
         loader = {
             '.jadn': jadn.load,
@@ -46,7 +45,7 @@ def load_schema(filename: str) -> dict:
     return schema
 
 
-def translate_2to3(v2doc: dict, verbose_id=False) -> list:
+def translate_2to3(v2doc: dict, verbose_id=False) -> dict:
     element = {
         'id': v2doc['SPDXID'],      # Get actual ID of SBOM Element.  (not SPDXRef-DOCUMENT)
         'type': {
@@ -57,7 +56,7 @@ def translate_2to3(v2doc: dict, verbose_id=False) -> list:
         'description': v2doc.get('description', ''),
         'comment': v2doc.get('comment', ''),
         # verifiedUsing
-        'externalReferences': v2doc['externalDocumentRefs']
+        # 'externalReferences': v2doc['externalDocumentRefs']
         # 'extension': no spdx2 equivalent
         # creationInfo comment: no spdx3 equivalent
     }
@@ -65,9 +64,9 @@ def translate_2to3(v2doc: dict, verbose_id=False) -> list:
         'specVersion': v2doc['spdxVersion'],
         'created': {
             'by': v2doc['creationInfo']['creators'],
-            'when': datems2int(v2doc['creationInfo']['created']),   # Serialize epoch or string?
+            'when': int2datems(datems2int(v2doc['creationInfo']['created'])),   # Serialize epoch or string?
         },
-        'profiles': 'Core',
+        'profiles': ['Core'],
         'dataLicense': v2doc['dataLicense'],
         'namespace': v2doc['documentNamespace']
     }
@@ -83,11 +82,13 @@ if __name__ == '__main__':
     codec2 = jadn.codec.Codec(load_schema(SPDX_V2_SCHEMA), verbose_rec=True, verbose_str=True)
     codec3 = jadn.codec.Codec(load_schema(SPDX_V3_SCHEMA), verbose_rec=True, verbose_str=True)
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    for fn in os.listdir(DATA_DIR):
-        if os.path.splitext(fn)[1] == '.json':
-            d2 = json.load(open(os.path.join(DATA_DIR, fn), 'r'))
+    for fx in os.listdir(DATA_DIR):
+        fn, ext = os.path.splitext(fx)
+        if ext == '.json':
+            print(f'{fx}:')
+            d2 = json.load(open(os.path.join(DATA_DIR, fx), 'r'))
             doc2 = codec2.decode('Document', d2)
             doc3 = translate_2to3(doc2)
             d3 = codec3.encode('Element', doc3)
-            with open(os.path.join(OUTPUT_DIR, fn), 'w') as fo:
-                json.dump(d3, fo)
+            with open(os.path.join(OUTPUT_DIR, fn + '_v3.json'), 'w') as fo:
+                json.dump(d3, fo, indent=2)

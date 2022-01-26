@@ -1,39 +1,32 @@
 {
-  "id": "http://sbom.auditguys.com/2021/nqMR92jAmlH424hJ/s1",
-  "type": {
-    "sbom": {
-      "elements": ["acme:f3", "p1", "p3", "f2", "p6", "f1", "i1"]
-    }
+  "namespace": "http://sbom.auditguys.com/2021/nqMR92jAmlH424hJ/",
+  "specVersion": "3.0",
+  "created": {
+    "by": ["i1"],
+    "when": "2021-11-10T14:39:23+00:00"
   },
-  "name": "SBOM 1",
-  "context": {
-    "specVersion": "3.0",
-    "created": {
-      "by": ["i1"],
-      "when": "2021-11-10T14:39:23+00:00"
-    },
-    "profile": ["Core"],
-    "dataLicense": "CC0-1.0",
-    "namespace": "http://sbom.auditguys.com/2021/nqMR92jAmlH424hJ/",
-    "prefixes": {
-      "acme": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/"
-    },
-    "elementValues": [
-      {"id": "i1", "type": {"identity": {"type": {"person": {}}, "email": "steve@auditguys.com"}}, "name": "Steven Miller"},
-      {"id": "p1", "type": {"package": {"packagePurpose": ["APPLICATION", "SOURCE"], "artifactUri": ["https://acme.com/products/xyz/foo-v4.1.3.deb"]}}, "name": "Package1"},
-      {"id": "p3", "type": {"package": {}}, "name": "Package3"},
-      {"id": "p6", "type": {"package": {}}, "name": "Package6"},
-      {"id": "p7", "type": {"package": {}}, "name": "Package7"},
-      {"id": "f1", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/abc.md", "originator": ["i1"]}}, "name": "file1"},
-      {"id": "f2", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/def.md"}}, "name": "file2"},
-      {"id": "f5", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/ghi.md"}}, "name": "file5"},
-      {"id": "f6", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/jkl.md"}}, "name": "file6"},
-      {"id": "f7", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/mno.md"}}, "name": "file7"}
-    ],
-    "elementRefs": [
-      {"id": "acme:p1", "verifiedUsing": {"hashes": {"md5": "6be192b1243a593ab0b690230c3ba842"}}},
-      {"id": "acme:p3", "verifiedUsing": {"hashes": {"md5": "fdfd284f69c52834b775f6f87d14b30e"}}},
-      {"id": "acme:f1", "verifiedUsing": {"hashes": {"md5": "505853425403a6782ac0001b1dfbb042"}}}
-    ]
-  }
+  "profiles": ["Core"],
+  "dataLicense": "CC0-1.0",
+  "elements": [
+    {"id": "s1", "type": {"sbom": {"elements": ["acme:f3", "p1", "p3", "f2", "p6", "f1", "i1"]}}, "name": "SBOM 1"},
+    {"id": "i1", "type": {"identity": {"type": {"person": {}}, "email": "steve@auditguys.com"}}, "name": "Steven Miller"},
+    {"id": "p1", "type": {"package": {"packagePurpose": ["APPLICATION", "SOURCE"], "artifactUri": ["https://acme.com/products/xyz/foo-v4.1.3.deb"]}}, "name": "Package1"},
+    {"id": "p3", "type": {"package": {}}, "name": "Package3"},
+    {"id": "p6", "type": {"package": {}}, "name": "Package6"},
+    {"id": "p7", "type": {"package": {}}, "name": "Package7"},
+    {"id": "f1", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/abc.md", "originator": ["i1"]}}, "name": "file1"},
+    {"id": "f2", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/def.md"}}, "name": "file2"},
+    {"id": "f5", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/ghi.md"}}, "name": "file5"},
+    {"id": "f6", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/jkl.md"}}, "name": "file6"},
+    {"id": "f7", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/mno.md"}}, "name": "file7"}
+  ],
+  "documentRefs": [
+    {
+      "namespace": "http://www.acme.com/foo/packages/",
+      "prefix": "acme",
+      "elements": ["p1", "p3", "f1"],
+      "artifactUri": "http://www.acme.com/foo/files/f1943.spdx",
+      "verifiedUsing": {"hashes": {"md5": "6be192b1243a593ab0b690230c3ba842"}}
+    }
+  ]
 }
