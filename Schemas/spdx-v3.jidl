@@ -4,9 +4,10 @@ title: "SPDX v3"
 description: "Information Model: serialization derived from SPDXv3 logical model"
 license: "CC0-1.0"
 
-UnitOfTransfer = Record     // Serialized data object ("document"), not a Document Element describing the document
+UnitOfTransfer = Record         // Serialized data object ("document"), not a Document Element
   1 namespace Key(IRI)                  // document id = namespace = unique id of this document
   2 elements Element [1..*]             // Elements, related or unrelated, serialized in this document
+  3 namespaceMap NamespaceMap optional  // Prefixes = namespace abbreviations
   3 documentRefs ExternalMap [0..*]     // Info about referenced documents containing serialized elements
   4 specVersion SemVer optional         // default property values for deserializing document
   5 created Created optional            // default property values for deserializing document
@@ -28,9 +29,10 @@ Element = Map
  12 externalReferences ExternalReference [0..*]
  13 extensions Extension [0..*]         // Or use extension point "..."
 
+NamespaceMap = MapOf(IRI, Prefix){1..*} // Prefixes = namespace abbreviations
+
 ExternalMap = Record                // Information about referenced documents (units of transfer)
   1 namespace Key(IRI)                  // Namespace of referenced document
-  2 prefix Prefix optional              // Abbreviation for namespace of referenced document
   2 elements Link(Element) [1..*]       // Elements serialized in referenced document
   3 artifactUri ArtifactUri optional    // URI of serialized document
   4 verifiedUsing IntegrityMethod       // Verifies document containing the referenced Element
@@ -73,7 +75,7 @@ ContextualCollection = Record           // (not needed)
   1 elements Link(Element) [1..*]       // <-Collection
   2 rootElements Link(Element) [0..*]   // <-Collection
 
-BOM = Record                            // (not needed)
+BOM = Record
   1 elements Link(Element) [1..*]       // <-Collection
   2 rootElements Link(Element) [0..*]   // <-Collection
 

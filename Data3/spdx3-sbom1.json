@@ -20,10 +20,12 @@
     {"id": "f6", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/jkl.md"}}, "name": "file6"},
     {"id": "f7", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/mno.md"}}, "name": "file7"}
   ],
+  "namespaceMap": {
+    "http://www.acme.com/foo/packages/": "acme"
+  },
   "documentRefs": [
     {
-      "namespace": "http://www.acme.com/foo/packages/",
-      "prefix": "acme",
+      "namespace": "acme",
       "elements": ["p1", "p3", "f1"],
       "artifactUri": "http://www.acme.com/foo/files/f1943.spdx",
       "verifiedUsing": {"hashes": {"md5": "6be192b1243a593ab0b690230c3ba842"}}

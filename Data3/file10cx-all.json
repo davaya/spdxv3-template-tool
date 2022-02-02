@@ -51,10 +51,12 @@
       }
     }
   ],
+  "namespaceMap": {
+    "http://sbom.auditguys.com/2021/nqMR92jAmlH424hJ/": "aud"
+  },
   "documentRefs": [
     {
-      "namespace": "http://sbom.auditguys.com/2021/nqMR92jAmlH424hJ/",
-      "prefix": "aud",
+      "namespace": "aud",
       "elements": ["i1"],
       "artifactUri": "https://www.auditguys.com/identities/2021/nqMR92jAmlH424hJ.spdx",
       "verifiedUsing": {"hashes": {"sha256": "2979fc0c9a484b50302d97313fd5ffb81d8b4a1c649c41a92030ffe93fae0ee6"}}
