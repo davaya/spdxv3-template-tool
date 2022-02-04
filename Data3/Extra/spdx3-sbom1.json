@@ -1,5 +1,5 @@
 {
-  "namespace": "http://sbom.auditguys.com/2021/nqMR92jAmlH424hJ/",
+  "namespace": "http://sbom.auditguys.com/AX7CqA-I/",
   "specVersion": "3.0",
   "created": {
     "by": ["i1"],
@@ -20,9 +20,6 @@
     {"id": "f6", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/jkl.md"}}, "name": "file6"},
     {"id": "f7", "type": {"file": {"contentType": "text/plain", "filePurpose": ["DOCUMENTATION"], "artifactUri": "http://somewhere.com/downloads/mno.md"}}, "name": "file7"}
   ],
-  "namespaceMap": {
-    "http://www.acme.com/foo/packages/": "acme"
-  },
   "documentRefs": [
     {
       "namespace": "acme",
@@ -30,5 +27,8 @@
       "artifactUri": "http://www.acme.com/foo/files/f1943.spdx",
       "verifiedUsing": {"hashes": {"md5": "6be192b1243a593ab0b690230c3ba842"}}
     }
-  ]
+  ],
+  "namespaceMap": {
+    "http://www.acme.com/foo/packages/": "acme"
+  }
 }

@@ -1,0 +1,68 @@
+{
+  "namespace": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/",
+  "specVersion": "3.0",
+  "created": {
+    "by": ["acme:i1"],
+    "when": "2021-12-23T10:00:00+00:00"
+  },
+  "profiles": ["Core", "Software"],
+  "dataLicense": "CC0-1.0",
+  "elements": [
+    {
+      "id": "foo-metadata-rev1",
+      "type": {
+        "package": {}
+      },
+      "name": "foo"
+    },
+    {
+      "id": "foo-contents-rev2",
+      "type": {
+        "relationship": {
+          "type": "CONTAINS",
+          "from": "foo-metadata-rev1",
+          "to": ["hello-file"]
+        }
+      }
+    },
+    {
+      "id": "foo-contents-amend-rev2",
+      "type": {
+        "relationship": {
+          "type": "AMENDS",
+          "from": "foo-contents-rev2",
+          "to": ["acme:foo-contents-rev1"]
+        }
+      }
+    },
+    {
+      "id": "annotation-rev1",
+      "type": {
+        "annotation": {
+          "type": "REVIEW",
+          "subject": "foo-metadata-rev1",
+          "statement": "Annotation example"
+        }
+      }
+    },
+    {
+      "id": "hello-file",
+      "type": {
+        "file": {}
+      },
+      "name": "hello"
+    }
+  ],
+  "documentRefs": [
+    {
+      "namespace": "acme",
+      "elements": ["foo-metadata-rev1", "foo-contents-rev1", "annotation-rev1", "hello-file", "world-file", "i1"],
+      "verifiedUsing": {
+        "hashes": {"md5": "6be192b1243a593ab0b690230c3ba842"}
+      }
+    }
+  ],
+  "namespaceMap": {
+    "http://sbom.acme.com/AX7CqA-I/": "acme"
+  }
+}

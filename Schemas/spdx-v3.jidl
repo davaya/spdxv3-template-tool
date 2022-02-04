@@ -6,13 +6,13 @@ license: "CC0-1.0"
 
 UnitOfTransfer = Record         // Serialized data object ("document"), not a Document Element
   1 namespace Key(IRI)                  // document id = namespace = unique id of this document
-  2 elements Element [1..*]             // Elements, related or unrelated, serialized in this document
-  3 namespaceMap NamespaceMap optional  // Prefixes = namespace abbreviations
-  3 documentRefs ExternalMap [0..*]     // Info about referenced documents containing serialized elements
-  4 specVersion SemVer optional         // default property values for deserializing document
-  5 created Created optional            // default property values for deserializing document
-  6 profiles ProfileIdentifier [0..*]   // default property values for deserializing document
-  7 dataLicense LicenseId optional      // default property values for deserializing document
+  2 specVersion SemVer                  // default property values for deserializing document
+  3 created Created                     // default property values for deserializing document
+  4 profiles ProfileIdentifier [1..*]   // default property values for deserializing document
+  5 dataLicense LicenseId               // default property values for deserializing document
+  6 elements Element [1..*]             // Elements, related or unrelated, serialized in this document
+  7 documentRefs ExternalMap [0..*]     // Info about referenced documents containing serialized elements
+  8 namespaceMap NamespaceMap optional  // Prefixes = namespace abbreviations
 
 Element = Map
   1 id Key(IRI)
@@ -21,10 +21,10 @@ Element = Map
   4 summary String optional
   5 description String optional
   6 comment String optional
-  7 specVersion SemVer optional         // required, explicit or default from document
-  8 created Created optional            // required, explicit or default from document
-  9 profiles ProfileIdentifier [0..*]   // required, explicit or default from document
- 10 dataLicense LicenseId optional      // required, explicit or default from document
+  7 specVersion SemVer optional         // explicit or default from document
+  8 created Created optional            // explicit or default from document
+  9 profiles ProfileIdentifier [0..*]   // explicit or default from document
+ 10 dataLicense LicenseId optional      // explicit or default from document
  11 verifiedUsing IntegrityMethod optional    // Only valid for Artifact types - move to Artifact/verifiedUsing
  12 externalReferences ExternalReference [0..*]
  13 extensions Extension [0..*]         // Or use extension point "..."
@@ -63,35 +63,35 @@ Relationship = Record
 Identity = Record
   1 type IdentityType
   2 email String /email optional
-  3 verifiedUsing IntegrityMethod optional    // Identity and Artifact entities are verified separately from Element properties
+  3 verifiedUsing IntegrityMethod optional  // Identity and Artifact entities are verified separately from Element properties
 
 Document = Record
-  1 elements Link(Element) [1..*]       // Serialized document contains these elementValues
-  2 artifactUri ArtifactUri optional    // <-Artifact
-  3 originator Link(Element) [0..*]     // <-Artifact
-  4 verifiedUsing IntegrityMethod optional    // <-Artifact(proposed), verifies referenced entity
+  1 elements Link(Element) [1..*]           // Serialized document contains these elementValues
+  2 artifactUri ArtifactUri optional        // <-Artifact
+  3 originator Link(Element) [0..*]         // <-Artifact
+  4 verifiedUsing IntegrityMethod optional  // <-Artifact(proposed), verifies referenced entity
 
-ContextualCollection = Record           // (not needed)
-  1 elements Link(Element) [1..*]       // <-Collection
-  2 rootElements Link(Element) [0..*]   // <-Collection
+ContextualCollection = Record               // (not needed)
+  1 elements Link(Element) [1..*]           // <-Collection
+  2 rootElements Link(Element) [0..*]       // <-Collection
 
 BOM = Record
-  1 elements Link(Element) [1..*]       // <-Collection
-  2 rootElements Link(Element) [0..*]   // <-Collection
+  1 elements Link(Element) [1..*]           // <-Collection
+  2 rootElements Link(Element) [0..*]       // <-Collection
 
 File = Record
   1 contentType MediaType optional
   2 filePurpose SoftwarePurpose [0..*]
-  3 artifactUri ArtifactUri optional    // <-Artifact
-  4 originator Link(Element) [0..*]     // <-Artifact
-  5 verifiedUsing IntegrityMethod optional    // verifies referenced entity
+  3 artifactUri ArtifactUri optional        // <-Artifact
+  4 originator Link(Element) [0..*]         // <-Artifact
+  5 verifiedUsing IntegrityMethod optional  // verifies referenced entity
 
 Snippet = Record
   1 location SnippetLocation
   2 snippetPurpose SoftwarePurpose [0..*]
-  3 artifactUri ArtifactUri [0..*]      // <-Artifact
-  4 originator Link(Element) [0..*]     // <-Artifact
-  5 verifiedUsing IntegrityMethod optional    // verifies referenced entity
+  3 artifactUri ArtifactUri [0..*]          // <-Artifact
+  4 originator Link(Element) [0..*]         // <-Artifact
+  5 verifiedUsing IntegrityMethod optional  // verifies referenced entity
 
 Package = Record
   1 packagePurpose SoftwarePurpose [0..*]
