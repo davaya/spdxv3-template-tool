@@ -10,8 +10,8 @@ UnitOfTransfer = Record         // Serialized data object ("document"), not a Do
   3 created Created                     // default property values for deserializing document
   4 profiles ProfileIdentifier [1..*]   // default property values for deserializing document
   5 dataLicense LicenseId               // default property values for deserializing document
-  6 elements Element [1..*]             // Elements, related or unrelated, serialized in this document
-  7 documentRefs ExternalMap [0..*]     // Info about referenced documents containing serialized elements
+  6 elements Element [1..*]             // Element values, defined or copied, serialized in this document
+  7 documentRefs ExternalMap [0..*]     // Info about referenced documents containing element values
   8 namespaceMap NamespaceMap optional  // Prefixes = namespace abbreviations
 
 Element = Map
@@ -136,7 +136,7 @@ DateTime = String  // implement Integer /datetime_ms
 
 MediaType = String
 
-Prefix = String{1..8}   // Abbreviation for document namespace
+Prefix = String{1..16}   // Abbreviation for document namespace
 
 SemVer = String
 

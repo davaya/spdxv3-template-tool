@@ -6,6 +6,8 @@ value of one or more Elements.
 
 The UnitOfTransfer type defines the structure of an SPDX v3 document.
 * UnitOfTransfer is not an Element.
+* Serialized data can be illustrated but not defined in the logical model because logical models do not address syntax.
+* UnitOfTransfer is defined in the [information model](Schemas/spdx-v3.jidl).
 * An optional Document Element may be created to describe a document and list the Element values it contains.
 
 A document contains:
@@ -34,3 +36,6 @@ In particular, re-serializing an Element into a single-Element document allows e
 Element to be verified by a single integrity check value regardless of any
 documents it was created in or copied to.
 
+## Serialization as shown in the logical model
+
+![](Images/document2a.jpg "Unit of Transfer Serialization")

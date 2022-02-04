@@ -116,7 +116,7 @@ def load_any(path: str) -> (dict, None):
 
 
 def dump_elements(document: dict, elements: list[dict]) -> None:
-    print({k: v for k, v in document.items() if k != 'elements'})
+    print('Document:', {k: v for k, v in document.items() if k != 'elements'})
     for e in elements:
         print(compress_element(document, e))
 

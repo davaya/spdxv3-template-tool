@@ -1,0 +1,48 @@
+{
+  "namespace": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/",
+  "specVersion": "3.0",
+  "created": {"by": ["acme-1493:i1"], "when": "2021-12-23T10:00:00+00:00"},
+  "profiles": ["Core", "Software"],
+  "dataLicense": "CC0-1.0",
+  "elements": [
+    {
+      "id": "foo-contents-rev2",
+      "type": {"relationship": {"type": "CONTAINS", "from": "acme-1493:foo-metadata-rev1", "to": ["acme-1493:hello-file"]}}
+    },
+    {
+      "id": "foo-contents-amend-rev2",
+      "type": {"relationship": {"type": "AMENDS", "from": "foo-contents-rev2", "to": ["acme:foo-contents-rev1"]}}
+    },
+    {
+      "id": "acme-1493:foo-metadata-rev1",
+      "type": {"package": {}},
+      "name": "foo"
+    },
+    {
+      "id": "acme-1493:annotation-rev1",
+      "type": {"annotation": {"type": "REVIEW", "subject": "acme-1493:foo-metadatarev1", "statement": "Annotation example"}}
+    },
+    {
+      "id": "acme-1493:hello-file",
+      "type": {"file": {}},
+      "name": "hello"
+    },
+    {
+      "id": "acme-1493:i1",
+      "type": {"identity": {"type": {"organization": {}}, "email": "packages@acme.com"}},
+      "name": "Acme Package Manager"
+    }
+  ],
+  "documentRefs": [
+    {
+      "namespace": "acme-1493",
+      "elements": ["foo-metadata-rev1", "foo-contents-rev1", "annotation-rev1", "hello-file", "world-file", "i1"],
+      "verifiedUsing": {
+        "hashes": {"md5": "6be192b1243a593ab0b690230c3ba842"}
+      }
+    }
+  ],
+  "namespaceMap": {
+    "http://sbom.acme.com/AX7CqA-I/": "acme-1493"
+  }
+}
