@@ -1,34 +1,36 @@
 # SPDX v3 Element Serialization
 
-In the SPDX v3 logical model the Element is the basic unit of information, and every Element is separate from
-and independent of every other Element. An SPDX document is the serialized value of one or more Elements.
+In the SPDX v3 logical model, Element is the basic unit of information, and every Element is
+independent of all other Elements. An SPDX "document" or "unit of transfer" is the serialized
+value of one or more Elements.
 
-## UnitOfTransfer
-
-The UnitOfTransfer type defines the structure of the serialized data in an SPDX v3 document.
-An Element of the Document type contains metadata describing an SPDX document.
+The UnitOfTransfer type defines the structure of an SPDX v3 document.
+* UnitOfTransfer is not an Element.
+* An optional Document Element may be created to describe a document and list the Element values it contains.
 
 A document contains:
 1. the document unique identifier (namespace)
-2. a set of one or more related or unrelated Elements
-3. optional references to other documents, allowing elements in those documents to be located, verified and referenced 
-4. optional namespace prefixes used to shorten Element identifiers
-5. optional default values for common element properties (specVersion, created (who and when), profiles, and dataLicense)
+2. document properties (specVersion, created (who and when), profiles, and dataLicense)
+3. a set of one or more defined or copied Element values
+4. optional references to other documents, allowing elements in those documents to be located, verified and referenced 
+5. optional namespace prefixes used to shorten Element identifiers
 
-Elements created in the same minting operation as the document are related by having the document's creation info.
-Elements created in a document have the document namespace as their id prefix.
-A document thus carries Elements in three categories:
-1. Elements created as part of the document (id is within document namespace, element and document creation info match)
-2. References to documents containing previously-created Elements
-3. Copies of previously-created Elements (id is not within document namespace, element and document creation info are different)
+A document may include Elements in three categories:
+1. Elements created as part of the document ("defined" in the document minting operation)
+2. References to documents containing previously-created Elements ("referenced" by the document)
+3. Copies of previously-created Elements ("copied" into the document)
+
+Defined element ids are under the document's id/namespace. Element creation info = document creation info.
+Other element properties (specVersion, profiles, dataLicense) may override the Document defaults.
+All other element values in a document are copied from prior minting operations,
+with element ids under the corresponding document namespaces.
 
 ## Design Considerations
 
 Every Element reference can be verified for integrity as a member of one or more documents.
-An individual Element created in one document can be copied into another document,
-and references to each of those documents can be verified for integrity.
-In particular, serializing an Element value into a single-Element document allows each
+If an Element created in one document is copied into other documents,
+references to any of those documents can verify Element integrity.
+In particular, re-serializing an Element into a single-Element document allows each
 Element to be verified by a single integrity check value regardless of any
 documents it was created in or copied to.
 
-Document Element ID (namespace or namespace + reserved name "SPDX-Document")
