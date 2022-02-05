@@ -143,7 +143,7 @@ if __name__ == '__main__':
     sc = jadn.codec.Codec(s, verbose_rec=True, verbose_str=True)
     for f in os.scandir(DATA_DIR):
         print(f.name)
-        if not f.is_file():
+        if not f.is_file() or os.path.splitext(f)[1] not in ('.json'):
             continue
         doc = sc.decode('UnitOfTransfer', json.load(open(f.path)))
         doc['local_ids'] = [compress_iri(doc, e['id']) for e in doc['elements']]
