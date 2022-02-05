@@ -1,7 +1,7 @@
 package: "http://spdx.org/spdx/v3/document"
 exports: ["UnitOfTransfer"]
 title: "SPDX v3"
-description: "Information Model: serialization derived from SPDXv3 logical model"
+description: "Information Model defines serialization based on the SPDXv3 logical model"
 license: "CC0-1.0"
 
 UnitOfTransfer = Record         // Serialized data object ("document"), not a Document Element
