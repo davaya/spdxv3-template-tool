@@ -6,7 +6,8 @@ The two Option 2 examples (revision 1 and revision 2) show relationship-based up
 The example element fragments were then converted into complete SPDX "Unit of Transfer" files to demonstrate
 JSON serialization based on an SPDX v3 [information model](../Schemas/spdx-v3.jidl)
 and its corresponding [logical diagram](../Images/document2a.jpg).
-This illustrates how the given element examples can be serialized to accomplish a known use case.
+This illustrates that concrete examples created for a specific use case can be repurposed
+as concrete examples for serialization.
 
 **Option 2 – Files are expressed as a CONTAINS relationship from Package to File**
 
