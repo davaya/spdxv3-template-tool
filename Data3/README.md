@@ -1,10 +1,12 @@
 # Serialized Relationship Examples
 The following examples were submitted to the SPDX technical committee to compare graph updates
-using properties vs. relationships.  These two examples illustrate relationship-based updates (Option 2).
+using properties vs. relationships.
+The two Option 2 examples (revision 1 and revision 2) show relationship-based updates.
 
 The example element fragments were then converted into complete SPDX "Unit of Transfer" files to demonstrate
-JSON serialization based on the SPDX v3 [information model](../Schemas/spdx-v3.jidl).  This illustrates
-how the given example elements are serialized to accomplish a known use case.
+JSON serialization based on an SPDX v3 [information model](../Schemas/spdx-v3.jidl)
+and its corresponding [logical diagram](../Images/document2a.jpg).
+This illustrates how the given element examples can be serialized to accomplish a known use case.
 
 **Option 2 – Files are expressed as a CONTAINS relationship from Package to File**
 
@@ -41,13 +43,15 @@ how the given example elements are serialized to accomplish a known use case.
 ```
 **Revision 1 - Unit of Transfer:**
 
-In addition to the use case elements, a unit of transfer needs a unique document ID (namespace) plus creation info
-that needs an identity element. The namespace can be any IRI, but this example uses an authority organization plus a
-millisecond-resolution timestamp in base64url format.  The IRI could also include identifying information such as
-a package name as long as it is globally unique. Local IDs ("hello-file", "world-file") can be descriptive or compact
-(e.g., "f1", "f2") as long as they are unique within the namespace.
+In addition to the element fragments used to evaluate update options, a complete unit of transfer needs
+a unique UoT ID (namespace) plus creation info that includes a creator identity.
+The namespace can be any IRI, but this example uses an authority organization plus a
+millisecond-resolution timestamp in base64url format to ensure global uniqueness.
+The namespace IRI can optionally include identifying information such as
+a package name. Local IDs can be descriptive ("hello-file", "world-file") or compact
+("f1", "f2") as long as they are unique within the UoT namespace.
 
-The Revision 1 unit of transfer is self-contained, all elements are defined within the unit of transfer namespace.
+The Revision 1 unit of transfer is self-contained; all elements are created as part of the UoT, with ids in the UoT namespace.
 ```json
 {
   "namespace": "http://sbom.acme.com/AX7CqA-I/",
@@ -125,8 +129,8 @@ The Revision 1 unit of transfer is self-contained, all elements are defined with
 
 A unit of transfer can:
 - define all elements needed as shown in revision 1
-- reference elements defined in other unit of transfer namespaces
-- include copies of elements defined in other namespaces
+- reference elements defined in other units of transfer
+- include copies of elements defined in other units of transfer
 
 This example contains just the two new relationship elements created in Revision 2, with references to
 elements defined in the Revision 1 document.
@@ -134,8 +138,8 @@ elements defined in the Revision 1 document.
 This example uses a namespace IRI in Microsoft Notary2 format to illustrate that serialization does not
 impose any restrictions on IRI format. In this case the notary id ensures global uniqueness,
 but the IRI could also include identifying information such as package name.
-The short prefix referring to the revision 1 document ("acme-1493") includes an arbitrary qualifier as a
-reminder that the prefix maps to an IRI that identifies a unit of transfer, not just a creator ("acme").
+The prefix used for the revision 1 document ("acme-1493") includes an arbitrary qualifier as a
+reminder that the prefix maps to a unit of transfer id, not just a creator ("acme").
 ```json
 {
   "namespace": "sha256:0kEfWkpXWZWQCk87lYeAoC1jCrt4g2nFr7ctzYAQqf8/",
@@ -221,7 +225,7 @@ values for all properties (e.g., "created") that differ from this unit of transf
 Rather than reference or copy elements from the revision 1 unit of transfer, revision 2 can create (define)
 a complete new set of elements. In this example the semantics differ from the reference and copy cases;
 new elements created in revision 2 replace elements from revision 1 as in Option 1.
-But for completeness, the "create new elements" unit of transfer, with no use of revision 1 elements
+But for completeness, a "create new elements" unit of transfer, with no reference to revision 1 elements
 despite the misleading -rev1 names, would be:
 ```json
 {
