@@ -98,6 +98,7 @@ Package = Record
   2 artifactUri ArtifactUri [0..*]      // <-Artifact
   3 originator Link(Element) [0..*]     // <-Artifact
   4 verifiedUsing IntegrityMethod optional    // verifies referenced entity
+  5 members Link(Element) [0..*]        // used for testing property vs. relationship
 
 SBOM = Record
   1 elements Link(Element) [1..*]       // <-Collection
