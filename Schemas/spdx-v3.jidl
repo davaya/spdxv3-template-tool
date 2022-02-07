@@ -1,15 +1,15 @@
 package: "http://spdx.org/spdx/v3/document"
 exports: ["UnitOfTransfer"]
 title: "SPDX v3"
-description: "Information Model defines serialization based on the SPDXv3 logical model"
+description: "This information model defines the serialized structure of SPDXv3 logical model types"
 license: "CC0-1.0"
 
-UnitOfTransfer = Record         // Serialized data object ("document"), not a Document Element
+UnitOfTransfer = Record         // Serialized data bytes ("document"), not an Element (e.g. BOM/SBOM, Document)
   1 namespace Key(IRI)                  // document id = namespace = unique id of this document
-  2 specVersion SemVer                  // default property values for deserializing document
-  3 created Created                     // default property values for deserializing document
-  4 profiles ProfileIdentifier [1..*]   // default property values for deserializing document
-  5 dataLicense LicenseId               // default property values for deserializing document
+  2 specVersion SemVer                  // document property (required)
+  3 created Created                     // document property (required)
+  4 profiles ProfileIdentifier [1..*]   // document property (required)
+  5 dataLicense LicenseId               // document property (required)
   6 elements Element [1..*]             // Element values, defined or copied, serialized in this document
   7 documentRefs ExternalMap [0..*]     // Info about referenced documents containing element values
   8 namespaceMap NamespaceMap optional  // Prefixes = namespace abbreviations
@@ -98,7 +98,7 @@ Package = Record
   2 artifactUri ArtifactUri [0..*]      // <-Artifact
   3 originator Link(Element) [0..*]     // <-Artifact
   4 verifiedUsing IntegrityMethod optional    // verifies referenced entity
-  5 members Link(Element) [0..*]        // used for testing property vs. relationship
+  5 contents Link(Element) [0..*]        // used for testing property vs. relationship
 
 SBOM = Record
   1 elements Link(Element) [1..*]       // <-Collection

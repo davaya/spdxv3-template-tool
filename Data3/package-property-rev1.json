@@ -7,7 +7,7 @@
   "elements": [
     {
       "id": "foo-metadata-rev1",
-      "type": {"package": {"artifactUri": ["https://acme.com/foo-package-v2.1.14"], "members": ["hello-file", "world-file"]}},
+      "type": {"package": {"artifactUri": ["https://acme.com/foo-package-v2.1.14"], "contents": ["hello-file", "world-file"]}},
       "name": "foo"
     },
     {
