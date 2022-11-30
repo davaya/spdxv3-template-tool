@@ -1,0 +1,31 @@
+{
+  "namespace": "http://sbom.acme.com/AX7CqA-I/",
+  "specVersion": "3.0",
+  "created": {"by": ["i1"], "when": "2021-11-8T14:15:16+00:00"},
+  "profiles": ["Core", "Software"],
+  "dataLicense": "CC0-1.0",
+  "elements": {
+    "foo-metadata-rev1": {
+      "type": {"package": {}},
+      "name": "foo"
+    },
+    "foo-contents-rev1": {
+      "type": {"relationship": {"type": "CONTAINS", "from": "foo-metadata-rev1", "to": ["hello-file", "world-file"]}}
+    },
+    "annotation-rev1": {
+      "type": {"annotation": {"type": "REVIEW", "subject": "foo-metadata-rev1", "statement": "Annotation example"}}
+    },
+    "hello-file": {
+      "type": {"file": {}},
+      "name": "hello"
+    },
+    "world-file": {
+      "type": {"file": {}},
+      "name": "world"
+    },
+     "i1": {
+      "type": {"identity": {"type": {"organization": {}}, "email": "packages@acme.com"}},
+      "name": "Acme Package Manager"
+    }
+  }
+}

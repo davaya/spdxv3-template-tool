@@ -3,6 +3,8 @@ import json
 import os
 import re
 from collections import defaultdict
+from io import TextIOWrapper
+from typing import TextIO
 from urllib.request import urlopen, Request
 from urllib.parse import urlparse
 from urllib.error import HTTPError
@@ -11,9 +13,9 @@ from urllib.error import HTTPError
 Generate JADN information model and JSON serialization from SPDXv3 template files
 """
 
-TEMPLATE_ROOT_DIR = os.path.join('..', 'spec-v3-template', 'model')
+TEMPLATE_ROOT_DIR = os.path.join('..', 'spdx-3-model', 'model')
 TEMPLATE_ROOT_REPO = 'https://api.github.com/repos/spdx/spdx-3-model/contents/model'
-TEMPLATE_ROOT = TEMPLATE_ROOT_REPO           # Select source of template files
+TEMPLATE_ROOT = TEMPLATE_ROOT_DIR           # Select source of template files
 
 OUTPUT_DIR = 'Out'
 OUTPUT_FILE = 'spdxv3-from-list-template'
@@ -32,66 +34,36 @@ class WebDirEntry:
         self.url = url
 
 
-def dd():
-    """
-    Return a recursive defaultdict
-    """
-    return defaultdict(dd)
-
-
-def atoi(s: str) -> int:
-    i = 0
-    if s:
-        try:
-            i = int(s)
-        except ValueError:
-            print(f'      converting invalid value "{s}" into 0')
-    return i
-
-
-def multopts(minc: str, maxc: str) -> list:
-    if maxc:
-        minc = atoi(minc)
-        maxc = 0 if maxc == '*' else atoi(maxc)
-    else:
-        minc = maxc = atoi(minc)
-    mo = {'minc': minc} if minc != 1 else {}
-    mo.update({'maxc': maxc} if maxc != 1 else {})
-    return jadn.opts_d2s(mo)
-
-
-def fieldtype(typename: str) -> str:
-    tmap = {
-        'xsd:string': 'String',
-        'xsd:integer': 'Integer',
-        'xsd:decimal': 'Number',
-        'xsd:dateTime': 'Timestamp'
-    }
-    return tmap[typename] if typename in tmap else typename
-
-
-def list_dir(dirname: str) -> dict:
+def list_dir(dirpath: str) -> dict:
     """
     Return a dict listing the files and directories in a directory on local filesystem or GitHub repo.
 
-    :param dirname: str - a filesystem path or GitHub API URL
+    :param dirpath: str - a filesystem path or GitHub API URL
     :return: dict {files: [DirEntry*], dirs: [DirEntry*]}
     Local Filesystem: Each list item is an os.DirEntry structure containing name and path attributes
     GitHub Filesystem: Each list item has name, path, and url (download URL) attributes
     """
 
     files, dirs = [], []
-    if dirname.startswith('https://'):
-        with urlopen(Request(dirname, headers=AUTH)) as d:
+    u = urlparse(dirpath)
+    if all([u.scheme, u.netloc]):
+        with urlopen(Request(dirpath, headers=AUTH)) as d:
             for dl in json.loads(d.read().decode()):
                 url = 'url' if dl['type'] == 'dir' else 'download_url'
                 entry = WebDirEntry(dl['name'], dl[url], dl['url'])
                 (dirs if dl['type'] == 'dir' else files).append(entry)
     else:
-        with os.scandir(dirname) as dlist:
+        with os.scandir(dirpath) as dlist:
             for entry in dlist:
                 (dirs if os.path.isdir(entry) else files).append(entry)
     return {'files': files, 'dirs': dirs}
+
+
+def open_file(fileentry: os.DirEntry) -> TextIO:
+    u = urlparse(fileentry.path)
+    if all([u.scheme, u.netloc]):
+        return TextIOWrapper(urlopen(Request(fileentry.path, headers=AUTH)), encoding='utf8')
+    return open(fileentry.path, 'r', encoding='utf8')
 
 
 def read_file(path: str) -> str:
@@ -102,6 +74,13 @@ def read_file(path: str) -> str:
         with open(path) as fp:
             doc = fp.read()
     return doc
+
+
+def dd():
+    """
+    Return a recursive defaultdict
+    """
+    return defaultdict(dd)
 
 
 def scan_template_file(fpath: str, file: str, category: str, fname: str) -> dict:
@@ -125,11 +104,11 @@ def scan_template_file(fpath: str, file: str, category: str, fname: str) -> dict
                 li1, li2 = '', ''
                 if section not in ('Summary', 'Description', 'Metadata', 'Properties', 'Entries'):
                     print(f'    {fpath} line {ln} -- Unknown section: "{section}"')
-                if section == 'Metadata':
-                    tval[section] = {'name': fname}
+                # if section == 'Metadata':
+                #    tval[section] = {'name': fname}
                     # default property values from top-level "Defaults.md"
-                    cdefault = {'id': '${NAMESPACE_id}/' + fname, 'Instantiability': 'Concrete', 'Status': 'Stable'}
-                    tval[section].update(cdefault if category == 'Classes' else {})
+                #    cdefault = {'id': '${NAMESPACE_id}/' + fname, 'Instantiability': 'Concrete', 'Status': 'Stable'}
+                #    tval[section].update(cdefault if category == 'Classes' else {})
             elif m := re.match(r'^[-*]\s+(.+)\s*$', line):
                 li1 = m.group(1)
                 if section in ('Metadata', 'Entries'):
@@ -163,13 +142,6 @@ def load_template_from_list_dirs(rootdir: str) -> dict:
     """
     Load SPDX v3 template from individual files in markdown list format
     :param rootdir: top level in directory hierarchy
-    """
-
-    """
-    global FILE_ROOT
-    if url == 'download_url' and not FILE_ROOT:
-        model = urlparse(dl["url"]).path.removeprefix(urlparse(TEMPLATE_ROOT).path)
-        FILE_ROOT = dl["download_url"].removesuffix(model)
     """
 
     def _d(path: str) -> str:
@@ -207,8 +179,39 @@ def load_template_from_list_dirs(rootdir: str) -> dict:
     return dict(templ)
 
 
+def atoi(s: str) -> int:
+    i = 0
+    if s:
+        try:
+            i = int(s)
+        except ValueError:
+            print(f'      converting invalid value "{s}" into 0')
+    return i
+
+
+def multopts(minc: str, maxc: str) -> list:
+    if maxc:
+        minc = atoi(minc)
+        maxc = 0 if maxc == '*' else atoi(maxc)
+    else:
+        minc = maxc = atoi(minc)
+    mo = {'minc': minc} if minc != 1 else {}
+    mo.update({'maxc': maxc} if maxc != 1 else {})
+    return jadn.opts_d2s(mo)
+
+
+def fieldtype(typename: str) -> str:
+    tmap = {
+        'xsd:string': 'String',
+        'xsd:integer': 'Integer',
+        'xsd:decimal': 'Number',
+        'xsd:dateTime': 'Timestamp'
+    }
+    return tmap[typename] if typename in tmap else typename
+
+
 if __name__ == '__main__':
-    print(f'Installed JADN version: {jadn.__version__}\n')
+    print(f'JADN Version: {jadn.__version__}, Test Data: {TEMPLATE_ROOT}, Access Token: ..{AUTH["Authorization"][-4:]}')
 
     # Load data from directory tree of individual files
     print(f'Scanning template files from "{TEMPLATE_ROOT}"')
@@ -216,8 +219,8 @@ if __name__ == '__main__':
 
     print(f'\nConverting logical model to information model: {OUTPUT_DIR}/{OUTPUT_FILE}')
     for package, template in templates.items():
-        if package != 'Core':
-            continue            # Ignore other packages until template has real data
+        # if package != 'Core':
+            # continue            # Ignore other packages until template has real data
 
         try:
             namespace = template[CATEGORY_METADATA][package]['Metadata']['id']

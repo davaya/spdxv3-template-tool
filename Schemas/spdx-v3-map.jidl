@@ -1,21 +1,23 @@
 package: "http://spdx.org/spdx/v3/document"
-exports: ["TransferUnit"]
+exports: ["UnitOfTransfer"]
 title: "SPDX v3"
 description: "This information model defines the serialized structure of SPDXv3 logical model types"
 license: "CC0-1.0"
 
-TransferUnit = Record         // Serialized data bytes ("document"), not an Element (e.g. BOM/SBOM, Document)
+UnitOfTransfer = Record         // Serialized data bytes ("document"), not an Element (e.g. BOM/SBOM, Document)
   1 namespace Key(IRI)                  // document id = namespace = unique id of this document
   2 specVersion SemVer                  // document property (required)
   3 created Created                     // document property (required)
   4 profiles ProfileIdentifier [1..*]   // document property (required)
   5 dataLicense LicenseId               // document property (required)
-  6 elements Element [1..*]             // Element values, defined or copied, serialized in this document
+  6 elements Elements                   // Element values, defined or copied, serialized in this document
   7 documentRefs ExternalMap [0..*]     // Info about referenced documents containing element values
   8 namespaceMap NamespaceMap optional  // Prefixes = namespace abbreviations
 
+Elements = MapOf(IRI, Element)          // fix parser to accept MapOf(IRI, Element)
+
 Element = Map
-  1 id Key(IRI)
+  // 1 id Key(IRI)
   2 type ElementType
   3 name String optional
   4 summary String optional
@@ -29,13 +31,13 @@ Element = Map
  12 externalReferences ExternalReference [0..*]
  13 extensions Extension [0..*]         // Or use extension point "..."
 
+NamespaceMap = MapOf(IRI, Prefix){1..*} // Prefixes = namespace abbreviations
+
 ExternalMap = Record                // Information about referenced documents (units of transfer)
   1 namespace Key(IRI)                  // Namespace of referenced document
-  2 elements Link(Element) [1..*]       // Elements serialized in referenced document
+  2 elements IRI [1..*]                 // Elements serialized in referenced document
   3 artifactUri ArtifactUri optional    // URI of serialized document
   4 verifiedUsing IntegrityMethod       // Verifies document containing the referenced Element
-
-NamespaceMap = MapOf(IRI, Prefix){1..*} // Prefixes = namespace abbreviations
 
 ElementType = Choice
   1 annotation Annotation
@@ -51,13 +53,13 @@ ElementType = Choice
 
 Annotation = Record
   1 type AnnotationType
-  2 subject Link(Element)
+  2 subject IRI
   3 statement String optional
 
 Relationship = Record
   1 type RelationshipType
-  2 from Link(Element)
-  3 to Link(Element) [1..*]
+  2 from IRI
+  3 to IRI [1..*]
   4 completeness RelationshipCompleteness optional
 
 Identity = Record
@@ -66,46 +68,46 @@ Identity = Record
   3 verifiedUsing IntegrityMethod optional  // Identity and Artifact entities are verified separately from Element properties
 
 Document = Record
-  1 elements Link(Element) [1..*]           // Serialized document contains these elementValues
+  1 elements IRI [1..*]           // Serialized document contains these elementValues
   2 artifactUri ArtifactUri optional        // <-Artifact
-  3 originator Link(Element) [0..*]         // <-Artifact
+  3 originator IRI [0..*]         // <-Artifact
   4 verifiedUsing IntegrityMethod optional  // <-Artifact(proposed), verifies referenced entity
 
 ContextualCollection = Record               // (not needed)
-  1 elements Link(Element) [1..*]           // <-Collection
-  2 rootElements Link(Element) [0..*]       // <-Collection
+  1 elements IRI [1..*]           // <-Collection
+  2 rootElements IRI [0..*]       // <-Collection
 
 BOM = Record
-  1 elements Link(Element) [1..*]           // <-Collection
-  2 rootElements Link(Element) [0..*]       // <-Collection
+  1 elements IRI [1..*]           // <-Collection
+  2 rootElements IRI [0..*]       // <-Collection
 
 File = Record
   1 contentType MediaType optional
   2 filePurpose SoftwarePurpose [0..*]
   3 artifactUri ArtifactUri optional        // <-Artifact
-  4 originator Link(Element) [0..*]         // <-Artifact
+  4 originator IRI [0..*]         // <-Artifact
   5 verifiedUsing IntegrityMethod optional  // verifies referenced entity
 
 Snippet = Record
   1 location SnippetLocation
   2 snippetPurpose SoftwarePurpose [0..*]
   3 artifactUri ArtifactUri [0..*]          // <-Artifact
-  4 originator Link(Element) [0..*]         // <-Artifact
+  4 originator IRI [0..*]         // <-Artifact
   5 verifiedUsing IntegrityMethod optional  // verifies referenced entity
 
 Package = Record
   1 packagePurpose SoftwarePurpose [0..*]
   2 artifactUri ArtifactUri [0..*]      // <-Artifact
-  3 originator Link(Element) [0..*]     // <-Artifact
+  3 originator IRI [0..*]     // <-Artifact
   4 verifiedUsing IntegrityMethod optional    // verifies referenced entity
-  5 contents Link(Element) [0..*]        // used for testing property vs. relationship
+  5 contents IRI [0..*]        // used for testing property vs. relationship
 
 SBOM = Record
-  1 elements Link(Element) [1..*]       // <-Collection
-  2 rootElements Link(Element) [0..*]   // <-Collection
+  1 elements IRI [1..*]       // <-Collection
+  2 rootElements IRI [0..*]   // <-Collection
 
 Created = Record
-  1 by Link(Element) [1..*]     // must be an Identity Element
+  1 by IRI [1..*]     // must be an Identity Element
   2 when DateTime
 
 IdentityType = Choice
